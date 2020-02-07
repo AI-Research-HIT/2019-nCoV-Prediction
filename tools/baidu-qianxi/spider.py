@@ -24,7 +24,7 @@ def conserve(html, time, name):
     res = pd.DataFrame(res)
     res.to_excel(excel_writer=work, sheet_name=time)
 
-def process(code, exist, time):
+def process(code, exist, time, move_type):
     for num, name in code.items():
         if name in exist:
             continue
@@ -35,7 +35,7 @@ def process(code, exist, time):
         for t in time:
             try:
                 print(name, t)
-                utl = 'http://huiyan.baidu.com/migration/cityrank.jsonp?dt=province&id=' + num + '&type=move_in&date=' + str(t)
+                utl = 'http://huiyan.baidu.com/migration/cityrank.jsonp?dt=province&id=' + num + '&type=' + move_type + '&date=' + str(t)
                 html = Open(utl).split('(')[1][:-1]
                 conserve(eval(html)['data'], str(t), name)
             except SyntaxError as e:
@@ -72,4 +72,4 @@ if __name__ == '__main__':
     exist = os.listdir()
     exist = {i[:-5] for i in exist}
 
-    process(code, exist, time)
+    process(code, exist, time, move_type)
