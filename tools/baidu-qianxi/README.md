@@ -14,5 +14,5 @@ out 迁出数据
 #### 如下
 
 ```
-python3 move_in.py in
+python3 spider.py in
 ```
