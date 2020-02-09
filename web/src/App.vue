@@ -1,17 +1,24 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <H1>疫情预测系统</H1>
+    <Map></Map>
+    <Chartline style="margin-top:100px"> </Chartline>
+        <H2>疫情趋势</H2>
+
+    <Pie></Pie>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import Chartline from './components/Chart-line'
+import Pie from './components/Pie.vue'
+import Map from './components/Map.vue'
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    Chartline,
+    Pie,
+    Map
   }
 }
 </script>

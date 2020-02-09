@@ -24,6 +24,19 @@ def conserve(html, time, name):
     res = pd.DataFrame(res)
     res.to_excel(excel_writer=work, sheet_name=time)
 
+def incity_trip_conserve(html, time):
+    global work
+    utime = []
+    value = []
+    print(html['list'])
+    for (k, v) in html['list'].items():
+        print(k, v)
+        utime.append(k)
+        value.append(v)
+    res = {'时间':utime, '强度':value}
+    res = pd.DataFrame(res)
+    res.to_excel(excel_writer=work, sheet_name=time)
+
 def process(code, exist, time, move_type):
     for num, name in code.items():
         if name in exist:
@@ -35,9 +48,15 @@ def process(code, exist, time, move_type):
         for t in time:
             try:
                 print(name, t)
-                utl = 'http://huiyan.baidu.com/migration/cityrank.jsonp?dt=province&id=' + num + '&type=' + move_type + '&date=' + str(t)
-                html = Open(utl).split('(')[1][:-1]
-                conserve(eval(html)['data'], str(t), name)
+                if move_type == 'incity':
+                    utl = 'http://huiyan.baidu.com/migration/internalflowhistory.jsonp?dt=city&id=' + num + '&date=' + str(t)
+                    html = Open(utl).split('(')[1][:-1]
+                    incity_trip_conserve(eval(html)['data'], str(t))
+                    break
+                else:
+                    utl = 'http://huiyan.baidu.com/migration/cityrank.jsonp?dt=province&id=' + num + '&type=' + move_type + '&date=' + str(t)
+                    html = Open(utl).split('(')[1][:-1]
+                    conserve(eval(html)['data'], str(t), name)
             except SyntaxError as e:
                 print(e)
                 pass
@@ -53,6 +72,8 @@ if __name__ == '__main__':
             move_type = 'move_in'
         elif type_arg == 'out':
             move_type = 'move_out'
+        elif type_arg == 'incity':
+            move_type = 'incity'
         else:
             print('invalid arguments')
             sys.exit(0)
