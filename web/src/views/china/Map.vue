@@ -1,9 +1,10 @@
 <template>
 
     <section class="chart-container">
-        <el-row :gutter="40" class="panel-group">
-                <H2>最新数据</H2>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+
+          <H2>最新数据</H2>
+          <el-row :gutter="40" class="panel-group">
+    <el-col :xs="12" :sm="12" :lg="4" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
         <div class="card-panel-icon-wrapper icon-people">
           <svg-icon icon-class="peoples" class-name="card-panel-icon" />
@@ -12,11 +13,11 @@
           <div class="card-panel-text">
             现存确诊
           </div>
-          <count-to :start-val="0" :end-val="102400" :duration="2600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="58036" :duration="1000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col :xs="12" :sm="12" :lg="4" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('messages')">
         <div class="card-panel-icon-wrapper icon-message">
           <svg-icon icon-class="message" class-name="card-panel-icon" />
@@ -25,11 +26,11 @@
           <div class="card-panel-text">
             现存疑似
           </div>
-          <count-to :start-val="0" :end-val="81212" :duration="3000" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="6242" :duration="3000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col :xs="12" :sm="12" :lg="4" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('purchases')">
         <div class="card-panel-icon-wrapper icon-money">
           <svg-icon icon-class="money" class-name="card-panel-icon" />
@@ -38,106 +39,114 @@
           <div class="card-panel-text">
             现存重症
           </div>
-          <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="11741" :duration="3200" class="card-panel-num" />
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col :xs="12" :sm="12" :lg="4" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('shoppings')">
         <div class="card-panel-icon-wrapper icon-shopping">
           <svg-icon icon-class="shopping" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            治愈
+            累计治愈
           </div>
           <count-to :start-val="0" :end-val="13600" :duration="3600" class="card-panel-num" />
         </div>
       </div>
     </el-col>
-        <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+        <el-col :xs="12" :sm="12" :lg="4" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('death')">
         <div class="card-panel-icon-wrapper icon-shopping">
           <svg-icon icon-class="shopping" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            死亡
+            累计死亡
           </div>
-          <count-to :start-val="0" :end-val="13600" :duration="3600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="1870" :duration="3600" class="card-panel-num" />
         </div>
       </div>
     </el-col>
   </el-row>
 		<!--工具条-->
-		<el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-			<el-form :model="filters">
-				<el-form-item>
-          <el-col :span="11">
-					<el-input placeholder="传染系数"></el-input>
+			<el-form ref="form" :model="form" class="sim-input">
+				<el-form-item label="计算参数: ">
+          <el-col :span="5">
+					  <el-input v-model="form.beta" placeholder="传染系数"></el-input>
           </el-col >
-          <el-col :span="11">
-          					<el-input placeholder="初始人数"></el-input>
+          <el-col :span="5">
+          	<el-input v-model="form.num" placeholder="初始人数"></el-input>
           </el-col>
 
 
 				</el-form-item>
-                <el-form-item>
-                <el-col :span="11">
-          <el-date-picker type="date" placeholder="初始日期" style="width: 100%;"></el-date-picker>
+                <el-form-item label="计算时间区间: ">
+                <el-col :span="5">
+          <el-date-picker v-model="form.startDate" type="date" placeholder="初始日期" style="width: 100%;"></el-date-picker>
                 </el-col>
-                    <el-col :span="11">
-          <el-date-picker type="date" placeholder="结束日期" style="width: 100%;"></el-date-picker>
+                    <el-col :span="5">
+          <el-date-picker v-model="form.endDate" type="date" placeholder="结束日期" style="width: 100%;"></el-date-picker>
           </el-col>
           </el-form-item>
-          <el-form-item label="隔离策略：">
-            <el-radio label="1">无限制</el-radio>
-            <el-radio label="2">居家隔离</el-radio>
-            <el-radio label="2">强制隔离</el-radio>
+          <el-form-item label="隔离策略: ">
+            <el-radio-group v-model="form.qua">
+              <el-radio label="1">无限制</el-radio>
+              <el-radio label="2">居家隔离</el-radio>
+              <el-radio label="3">强制隔离</el-radio>
+            </el-radio-group>
           </el-form-item>
-				<el-form-item>
-					<el-button type="primary">开始仿真模拟</el-button>
+				<el-form-item label="选择地区: ">
+              <el-select v-model="form.value" @change="onProvinceChange" clearable placeholder="请选择计算省份">
+                <el-option
+                  v-for="item in form.options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
 				</el-form-item>
-
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">开始仿真模拟</el-button>
+        </el-form-item>
 			</el-form>
-		</el-col>
         <el-row>
+                      <el-col :span="24">
+              <H2>疫情趋势预测</H2>
+
+              <div>
+                  <ve-line :data="chartData" :settings="lineChartSettings"></ve-line>
+              </div>
+            </el-col>
             <H2>疫情发展趋势节点时间对比</H2>
             <el-col :span="8">
               <div>
-                <ve-heatmap :data="mapData" style="width:100%; height:100%;" :settings="chartSettings">
+                <ve-heatmap :data="mapDataS" style="width:100%; height:100%;" :settings="chartSettings">
                 </ve-heatmap>
-                <H2>2020年1月21日</H2>
 
               </div>
             </el-col>
                         <el-col :span="8">
               <div>
-                <ve-heatmap :data="mapData" style="width:100%; height:100%;" :settings="chartSettings">
+                <ve-heatmap :data="mapDataN" style="width:100%; height:100%;" :settings="chartSettings">
                 </ve-heatmap>
-                <H2>2020年2月14日</H2>
 
               </div>
             </el-col>
                         <el-col :span="8">
               <div>
-                <ve-heatmap :data="mapData" style="width:100%; height:100%;" :settings="chartSettings">
+                <ve-heatmap :data="mapDataA" style="width:100%; height:100%;" :settings="chartSettings">
                 </ve-heatmap>
-                <H2>2020年3月14日</H2>
 
               </div>
             </el-col>
               <div class="block">
     <span class="demonstration">时间轴</span>
-    <el-slider v-model="value4" :format-tooltip="formatTooltip"></el-slider>
+    <div class="block">
+    <el-slider v-model="form.comp" range :marks="marks" :max="max" @change="onMapDateChange"></el-slider>
+    </div>
   </div>
-            <el-col :span="24">
-              <H2>疫情趋势预测</H2>
-
-              <div>
-                  <ve-line :data="chartData"></ve-line>
-              </div>
-            </el-col>
         </el-row>
         
     </section>
@@ -148,6 +157,8 @@
 <script>
 import CountTo from 'vue-count-to'
 
+	import { simulate } from '../../api/api';
+
   export default {
       components: {
     CountTo
@@ -155,6 +166,84 @@ import CountTo from 'vue-count-to'
     methods: {
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type)
+    },
+		onSubmit() {
+      	var para = {
+					beta: this.form.beta,
+          num: this.form.num,
+          startDate: this.form.startDate,
+          endDate: this.form.endDate
+        };
+
+        
+      	simulate(para).then(res => {
+          console.log(res.result)
+          //NProgress.done();
+          this.chartData.rows = res.result
+          this.timeline = res.result.length
+          var val = res.result.length/2
+                var s = val - 7
+      if (s < 0) {
+        s = 0
+      }
+
+      var a = val + 7 
+      if (a > this.chartData.rows.length-1) {
+        a = this.chartData.rows.length-1
+      }
+
+      this.form.comp = [0, this.chartData.rows.length-1]
+      
+      this.mapDataS.rows[0]['人数'] = this.chartData.rows[s].true
+      this.mapDataN.rows[0]['人数'] = this.chartData.rows[val].true
+      this.mapDataA.rows[0]['人数'] = this.chartData.rows[a].true
+
+      this.max = this.chartData.rows.length-1
+      this.marks = {}
+      var num = 0
+      for(var i of this.chartData.rows) {
+        this.marks[num] = i.date
+        num++
+      }
+
+        });
+				console.log('submit!');
+    },
+    formatTooltip(val) {
+        if (this.chartData.rows.length == 1) {
+          return val
+        }
+        return this.chartData.rows[val].date;
+    },
+    onProvinceChange() {
+      console.log(this.form.value)
+      this.chartSettings.position = 'province/' + this.form.value
+      console.log(this.chartSettings)
+
+      if (this.mapDataS.rows[0]['人数'] != 0) {
+        this.mapDataS.rows[0]['人数'] = 0
+        this.mapDataN.rows[0]['人数'] = 0
+        this.mapDataA.rows[0]['人数'] = 0
+      } else {
+        this.mapDataS.rows[0]['人数'] = 1
+        this.mapDataN.rows[0]['人数'] = 1
+        this.mapDataA.rows[0]['人数'] = 1
+      }
+    },
+    onMapDateChange(val) {
+      var s = val - 7
+      if (s < 0) {
+        s = 0
+      }
+
+      var a = val + 7 
+      if (a > this.chartData.rows.length-1) {
+        a = this.chartData.rows.length-1
+      }
+      
+      this.mapDataS.rows[0]['人数'] = this.chartData.rows[s].true
+      this.mapDataN.rows[0]['人数'] = this.chartData.rows[val].true
+      this.mapDataA.rows[0]['人数'] = this.chartData.rows[a].true
     }
   },
     data () {
@@ -178,58 +267,98 @@ import CountTo from 'vue-count-to'
           }
         }
       }
+      this.lineChartSettings = {
+        xAxisType: 'category'
+      }
       return {
-        mapData: {
+        mapDataS: {
           columns: ['lat', 'lng', '人数'],
           rows: [
-            { 'lat': 115.892151, 'lng': 28.676493, '人数': 1000 },
-            { 'lat': 117.000923, 'lng': 36.675807, '人数': 400 },
-            { 'lat': 113.665412, 'lng': 34.757975, '人数': 800 },
-            { 'lat': 114.298572, 'lng': 30.584355, '人数': 200 },
-            { 'lat': 112.982279, 'lng': 28.19409, '人数': 100 },
-            { 'lat': 113.280637, 'lng': 23.125178, '人数': 300 },
-            { 'lat': 110.33119, 'lng': 20.031971, '人数': 800 },
-            { 'lat': 104.065735, 'lng': 30.659462, '人数': 700 },
-            { 'lat': 108.948024, 'lng': 34.263161, '人数': 300 },
-            { 'lat': 103.823557, 'lng': 36.058039, '人数': 500 }
+            { 'lat': 13522737.951955654, 'lng': 3639354.061162123, '人数': 0 },
+          ]
+        },
+        mapDataN: {
+          columns: ['lat', 'lng', '人数'],
+          rows: [
+            { 'lat': 13522737.951955654, 'lng': 3639354.061162123, '人数': 0 },
+          ]
+        },
+        mapDataA: {
+          columns: ['lat', 'lng', '人数'],
+          rows: [
+            { 'lat': 13522737.951955654, 'lng': 3639354.061162123, '人数': 0 },
           ]
         },
         chartData: {
-          columns: ['日期', '预测确诊数量', '预测疑似数量', '真实死亡率', '真实确诊数量'],
+          columns: ['date', 'true', 'predict'],
           rows: [
-            { '日期': '1/1', '预测确诊数量': 1393, '预测疑似数量': 1093, '真实死亡率': 0.32, '真实确诊数量': 1000 },
-            { '日期': '1/2', '预测确诊数量': 3530, '预测疑似数量': 3230, '真实死亡率': 0.26, '真实确诊数量': 2000  },
-            { '日期': '1/3', '预测确诊数量': 2923, '预测疑似数量': 2623, '真实死亡率': 0.76 , '真实确诊数量': 1877 },
-            { '日期': '1/4', '预测确诊数量': 1723, '预测疑似数量': 1423, '真实死亡率': 0.49 , '真实确诊数量': 3776 },
-            { '日期': '1/5', '预测确诊数量': 3792, '预测疑似数量': 3492, '真实死亡率': 0.323 , '真实确诊数量': 1333 },
-            { '日期': '1/6', '预测确诊数量': 4593, '预测疑似数量': 4293, '真实死亡率': 0.78 , '真实确诊数量': 3721 }
+            { 'date': '2018-01-01', 'true': 1393, 'predict': 1093}
           ]
-        }
+        },
+        marks: {
+          0: '2020-01-22',
+          1: '2020-01-23'
+        },
+        max: 2,
+        form: {
+          beta: '',
+          num: '',
+          qua: '1',
+          startDate: '',
+          endDate: '',
+          value: '',
+          options: [{
+          value: 'shanghai',
+          label: '上海'
+        }, {
+          value: 'beijing',
+          label: '北京'
+        }, {
+          value: 'hubei',
+          label: '湖北'
+        }, {
+          value: 'hunan',
+          label: '湖南'
+        }, {
+          value: 'guangdong',
+          label: '广东'
+        }],
+        comp: [20, 30]
+        },
+      timeline: 10
+
       }
     }
   }
 </script>
 
 <style lang="scss" scoped>
+.chart-container {
+    width: 100%;
+    float: left;
+}
+/*.chart div {
+    height: 400px;
+    float: left;
+}*/
 
-    .chart-container {
-        width: 100%;
-        float: left;
-    }
-    /*.chart div {
-        height: 400px;
-        float: left;
-    }*/
+.el-col {
+    padding: 0px 10px;
+}
+.el-row {
+  padding-bottom: 10px;
+}
 
-    .el-col {
-        padding: 30px 20px;
-    }
-    
 .panel-group {
-  margin-top: 18px;
+  margin-top: 10px;
+
+.H2 {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
 
   .card-panel-col {
-    margin-bottom: 32px;
+    margin-bottom: 10px;
   }
 
   .card-panel {
@@ -243,7 +372,6 @@ import CountTo from 'vue-count-to'
     box-shadow: 4px 4px 40px rgba(0, 0, 0, .05);
     border-color: rgba(0, 0, 0, .05);
 
-    &:hover {
       .card-panel-icon-wrapper {
         color: #fff;
       }
@@ -263,7 +391,6 @@ import CountTo from 'vue-count-to'
       .icon-shopping {
         background: #34bfa3
       }
-    }
 
     .icon-people {
       color: #40c9c6;
@@ -332,6 +459,4 @@ import CountTo from 'vue-count-to'
     }
   }
 }
-
-
 </style>

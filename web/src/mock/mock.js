@@ -1,6 +1,7 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { LoginUsers, Users } from './data/user';
+import { Result } from './data/predict';
 let _Users = Users;
 
 export default {
@@ -40,6 +41,20 @@ export default {
             resolve([200, { code: 500, msg: '账号或密码错误' }]);
           }
         }, 1000);
+      });
+    });
+
+    mock.onPost('/simulate').reply(config => {
+      console.log(config.data)
+      let {beta, num, startDate, endDate} = JSON.parse(config.data);
+      console.log(startDate)
+      return new Promise((resolve, reject) => {
+        console.log(1)
+          setTimeout(() => {
+            resolve([200, {
+              result: Result
+            }]);
+          }, 1000); 
       });
     });
 

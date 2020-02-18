@@ -1,6 +1,6 @@
 <template>
     <section class="chart-container">
-              <el-row :gutter="40" class="panel-group">
+    <el-row :gutter="40" class="panel-group">
                 <H2>最新数据</H2>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="handleSetLineChartData('newVisitis')">

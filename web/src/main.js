@@ -14,6 +14,7 @@ import Mock from './mock'
 Mock.bootstrap();
 import 'font-awesome/css/font-awesome.min.css'
 import VCharts from 'v-charts'
+import './icons'
 
 Vue.use(VCharts)
 Vue.use(ElementUI)

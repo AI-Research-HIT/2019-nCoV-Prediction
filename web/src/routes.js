@@ -5,6 +5,7 @@ import Main from './views/Main.vue'
 import echarts from './views/charts/echarts.vue'
 import ChinaAna from './views/china/Map.vue'
 import HaerbinAna from './views/haerbin/Map.vue'
+import SimTemplate from './views/sim-template/template.vue'
 
 import { mapActions } from 'vuex'
 
@@ -68,7 +69,7 @@ let routes = [
         component: Home,
         name: 'China',
         leaf: true,
-        iconCls: 'el-icon-message',
+        iconCls: 'el-icon-data-analysis',
         children: [
             { path: '/china', component: ChinaAna, name: '国内疫情趋势模拟' },
         ]
@@ -78,9 +79,19 @@ let routes = [
         component: Home,
         name: 'Haerbin',
         leaf: true,
-        iconCls: 'el-icon-message',
+        iconCls: 'el-icon-data-analysis',
         children: [
             { path: '/haerbin', component: HaerbinAna, name: '哈尔滨疫情趋势模拟' },
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: 'Sim-Template',
+        leaf: true,
+        iconCls: 'el-icon-data-analysis',
+        children: [
+            { path: '/sim-template', component: SimTemplate, name: '计算模版' },
         ]
     },
     {
