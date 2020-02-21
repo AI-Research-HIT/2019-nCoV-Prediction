@@ -75,7 +75,7 @@
 	export default {
 		data() {
 			return {
-				sysName:'VUEADMIN',
+				sysName:'疫情传播预测分析',
 				collapsed:false,
 				sysUserName: '',
 				sysUserAvatar: '',

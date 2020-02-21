@@ -51,20 +51,32 @@
             this.logining = true;
             //NProgress.start();
             var loginParams = { username: this.ruleForm2.account, password: this.ruleForm2.checkPass };
-            requestLogin(loginParams).then(data => {
-              this.logining = false;
-              //NProgress.done();
-              let { msg, code, user } = data;
-              if (code !== 200) {
-                this.$message({
-                  message: msg,
-                  type: 'error'
-                });
-              } else {
-                sessionStorage.setItem('user', JSON.stringify(user));
-                this.$router.push({ path: '/china' });
-              }
-            });
+            this.$axios({
+              method: 'post',
+              url: '/login'
+              })
+              .then(function (response) {
+                sessionStorage.setItem('user', JSON.stringify(response.data.data));
+                _this.$router.push({ path: '/china' });
+              console.log(response)
+              })
+              .catch(function (error) {
+              console.log(error)
+            })
+            // requestLogin(loginParams).then(data => {
+            //   this.logining = false;
+            //   //NProgress.done();
+            //   let { msg, code, user } = data;
+            //   if (code !== 200) {
+            //     this.$message({
+            //       message: msg,
+            //       type: 'error'
+            //     });
+            //   } else {
+            //     sessionStorage.setItem('user', JSON.stringify(user));
+            //     this.$router.push({ path: '/china' });
+            //   }
+            // });
           } else {
             console.log('error submit!!');
             return false;

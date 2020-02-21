@@ -6,6 +6,7 @@ import echarts from './views/charts/echarts.vue'
 import ChinaAna from './views/china/Map.vue'
 import HaerbinAna from './views/haerbin/Map.vue'
 import SimTemplate from './views/sim-template/template.vue'
+import SEIBRModel from './views/SEIBR-model/SEIBR-model.vue'
 
 import { mapActions } from 'vuex'
 
@@ -67,33 +68,43 @@ let routes = [
     {
         path: '/',
         component: Home,
-        name: 'China',
+        name: '',
         leaf: true,
         iconCls: 'el-icon-data-analysis',
         children: [
-            { path: '/china', component: ChinaAna, name: '国内疫情趋势模拟' },
+            { path: '/china', component: ChinaAna, name: '省市疫情分析预测' },
         ]
     },
     {
         path: '/',
         component: Home,
-        name: 'Haerbin',
+        name: '',
         leaf: true,
         iconCls: 'el-icon-data-analysis',
         children: [
-            { path: '/haerbin', component: HaerbinAna, name: '哈尔滨疫情趋势模拟' },
+            { path: '/sim-template', component: SimTemplate, name: '疫情发展状态模拟' },
         ]
     },
-    {
-        path: '/',
-        component: Home,
-        name: 'Sim-Template',
-        leaf: true,
-        iconCls: 'el-icon-data-analysis',
-        children: [
-            { path: '/sim-template', component: SimTemplate, name: '计算模版' },
-        ]
-    },
+    // {
+    //     path: '/',
+    //     component: Home,
+    //     name: '',
+    //     leaf: true,
+    //     iconCls: 'el-icon-data-analysis',
+    //     children: [
+    //         { path: '/haerbin', component: HaerbinAna, name: '哈尔滨疫情深入分析' },
+    //     ]
+    // },
+    // {
+    //     path: '/',
+    //     component: Home,
+    //     name: '',
+    //     leaf: true,
+    //     iconCls: 'el-icon-data-analysis',
+    //     children: [
+    //         { path: '/sribr', component: SimTemplate, name: 'SEIBR模型详解' },
+    //     ]
+    // },
     {
         path: '*',
         hidden: true,
