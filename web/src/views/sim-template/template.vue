@@ -46,14 +46,14 @@
         </el-row>
                 <el-row>
             <el-col :span="12">
-              <H2>接触人数与感染数量关系</H2>
+              <H3>接触人数与感染数量关系</H3>
 
               <div>
                   <ve-line :data="lineMData" :settings="valLineSettings"></ve-line>
               </div>
             </el-col>
             <el-col :span="12">
-              <H2>Alpha与感染数量关系</H2>
+              <H3>Alpha与感染数量关系</H3>
 
               <div>
                   <ve-line :data="lineAlphaData" :settings="valLineSettings"></ve-line>
@@ -61,6 +61,7 @@
             </el-col>
         </el-row>
             <el-row>
+                <H2>疫情时间节点对比</H2>
             <el-col :span="8">
               <div class="chinaMap" id="chinaMapBefore">
               </div>
@@ -74,6 +75,7 @@
               </div>
             </el-col>
         </el-row>
+        <H3>拖动选择上图对比日期</H3>
           <div class="slider">
             <el-slider
             v-model="slidervalue"
@@ -81,6 +83,7 @@
             :min="slidermin"
             :max="slidermax"
             :format-tooltip="formatTooltip"
+            @change="sliderChange"
             :marks="slidermarks">
             </el-slider>
         </div>
@@ -98,6 +101,40 @@
         
     var predictChart
     var dates = []
+    var chinaChartBefore
+    var chinaChartNow
+    var chinaChartAfter
+
+    var baseVisualMap= {
+                show : true,
+                x: 'left',
+                y: 'center',
+                splitList: [
+                {start: 0, end: 0},{start: 1, end: 200},
+                {start: 200, end: 400},{start: 400, end: 1000},
+                {start: 1000, end: 2000},{start: 2000, end: 10000},{start: 10000}
+                ],
+                color: ['#ff2222', '#ff4444','#ff6666', '#ff9999', '#ffbbbb', '#ffcccc', '#ffeeee']
+                }
+    var baseMapSeries= [
+            {
+                name: "关键时间节点疫情比较",
+                type: "map",
+                mapType: "china",
+                roam: false,
+                zoom:1.2,//默认地图在容器中显示zoom:1,可根据需求放大缩小地图
+                itemStyle:{
+                    areaColor:'#ff0000',//地图区域背景颜色
+                    borderColor:'#fff'//地图边界颜色
+                },
+                label: {
+                    normal: {
+                        show: false
+                    },
+                },
+                data: [
+                ]
+            }]
   export default {
     components: {
         CountTo
@@ -111,14 +148,59 @@
             if (val >= 0 && val < dates.length)
             return dates[val]
         },
+        sliderChange() {
+            console.log(this.slidervalue)
+            if (this.modelResult.length > 0) {
+                if (this.slidervalue[0] >= 0 && this.slidervalue[0] < this.modelResult.length) {
+                    var before = {name:this.selectedCity, value:this.modelResult[this.slidervalue[0]]['predictTotal']}
+                    console.log(before)
+                    this.beforeMapOption.series[0].data = []
+                    this.beforeMapOption.series[0].data.push(before)
+                    this.beforeMapOption.title.text = "疫情初期形势 " + this.modelResult[this.slidervalue[0]]['date'] + "：预测确诊" + before.value
+                    chinaChartBefore.setOption(this.beforeMapOption)
+                }
+
+                if (this.slidervalue[1] >= 0 && this.slidervalue[1] < this.modelResult.length) {
+                    var after = {name:this.selectedCity, value:this.modelResult[this.slidervalue[1]]['predictTotal']}
+                    console.log(after)
+                    this.afterMapOption.title.text = "未来疫情形势 " + this.modelResult[this.slidervalue[1]]['date'] + "：预测确诊" + after.value
+                    this.afterMapOption.series[0].data = []
+                    this.afterMapOption.series[0].data.push(after)
+                    chinaChartAfter.setOption(this.afterMapOption)
+                }
+            }
+        },
+        calMapDate(data, idx) {            
+            var before = {name:this.selectedCity, value:data[0]['predictTotal']}
+            this.beforeMapOption.series[0].data = []
+            this.beforeMapOption.series[0].data.push(before)
+            this.beforeMapOption.title.text = "疫情初期形势 " + data[0]['date']  + "：预测确诊" + before.value
+            chinaChartBefore.setOption(this.beforeMapOption)
+
+            if (idx == 0) {
+                idx = data.length/2
+            }
+            var now = {name:this.selectedCity, value:data[idx]['predictTotal']}
+            this.nowMapOption.series[0].data = []
+            this.nowMapOption.series[0].data.push(now)
+            this.nowMapOption.title.text = "现在疫情形势 " + data[idx]['date']  + "：预测确诊" + now.value
+            chinaChartNow.setOption(this.nowMapOption)
+
+            var after = {name:this.selectedCity, value:data[data.length-1]['predictTotal']}
+            this.afterMapOption.title.text = "未来疫情形势 " + data[data.length-1]['date']  + "：预测确诊" + after.value
+            this.afterMapOption.series[0].data = []
+            this.afterMapOption.series[0].data.push(after)
+            chinaChartAfter.setOption(this.afterMapOption)
+
+        },
         drawMap() {
-            var chinaChartBefore = echarts.init(
+            chinaChartBefore = echarts.init(
                 document.getElementById("chinaMapBefore")
             );
-            var chinaChartNow = echarts.init(
+            chinaChartNow = echarts.init(
                 document.getElementById("chinaMapNow")
             );
-            var chinaChartAfter = echarts.init(
+            chinaChartAfter = echarts.init(
                 document.getElementById("chinaMapAfter")
             );
             chinaChartBefore.setOption(this.beforeMapOption);
@@ -195,9 +277,14 @@
           var predictTotal = []
           var predictCure = []
           var predictDeath = []
-            var actives = response.data.data.actives
+          var actives = response.data.data.actives
 
           _this.slidermax = actives.length-1
+          _this.slidervalue = [0, _this.slidermax]
+          var idxj = 0
+          var now = new Date()
+          var findIdx = 0
+          _this.modelResult = actives
           for (let i of actives) {
             //var dicTotal = {}
             var dicM = {}
@@ -206,6 +293,10 @@
             var totalI = i['totalInfection']
             predictTotal.push(i['predictTotal'])
             //dicTotal['date'] = i['date']
+            var itera = new Date(i['date'])
+            if (now.setHours(0, 0, 0, 0) == itera.setHours(0, 0, 0, 0)) {
+                findIdx = idxj                
+            }
             dicM['date'] = i['date']
             dicAlpha['date'] = i['date']
             dates.push(i['date'])
@@ -223,10 +314,14 @@
             //_this.lineTotalData.rows.push(dicTotal)
             _this.lineMData.rows.push(dicM)
             _this.lineAlphaData.rows.push(dicAlpha)
+            idxj++
           }
+        _this.calMapDate(actives, findIdx)
+
           var marks = {}
           var idx = 0
           for (let i of dates) {
+            i = i.replace("2020-", "")
             marks[idx] = i
             idx++
           }
@@ -265,40 +360,7 @@
         })
     },
     onProvinceChange() {
-        
-        console.log(this.form.city)
-        console.log(this.form.options[this.form.city].label)
-    //   this.chartSettings.position = 'province/' + this.form.value
-    //   console.log(this.chartSettings)
-
-    //   if (this.mapDataS.rows[0]['人数'] != 0) {
-    //     this.mapDataS.rows[0]['人数'] = 0
-    //     this.mapDataN.rows[0]['人数'] = 0
-    //     this.mapDataA.rows[0]['人数'] = 0
-    //   } else {
-    //     this.mapDataS.rows[0]['人数'] = 1
-    //     this.mapDataN.rows[0]['人数'] = 1
-    //     this.mapDataA.rows[0]['人数'] = 1
-    //   }
-    },
-    onMapDateChange(val) {
-      var s = val - 7
-      if (s < 0) {
-        s = 0
-      }
-
-      var a = val + 7 
-      if (a > this.chartData.rows.length-1) {
-        a = this.chartData.rows.length-1
-      }
-
-      if (this.chartData.rows.length == 1) {
-        return 
-      }
-      
-      this.mapDataS.rows[0]['人数'] = this.chartData.rows[s].true
-      this.mapDataN.rows[0]['人数'] = this.chartData.rows[val].true
-      this.mapDataA.rows[0]['人数'] = this.chartData.rows[a].true
+        this.selectedCity = this.form.options[this.form.city].label
     }
   },
     data () {
@@ -313,154 +375,22 @@
             title: {
                 text: "疫情初期形势"
             },
-            // tooltip:{//鼠标移上去时显示悬浮框
-            //     backgroundColor:'transparent',//悬浮框最外层设置了默认padding;5,背景色灰色，如果要自定义，设置padding:0;或者背景色透明。
-            //     padding:0,
-            //     //trigger:'item'//设置该属性之后，会与series中data数据对应，如上图。注意data中对象的键名为name。如果单纯的展示数据可用此属性，不与formatter同用。
-            // },
-            visualMap: {
-                show : true,
-                x: 'left',
-                y: 'center',
-                splitList: [
-                {start: 400, end: 500},{start: 300, end: 400},
-                {start: 200, end: 300},{start: 100, end: 200},
-                {start: 0, end: 100},
-                ],
-                color: ['#110000', '#330000','#660000', '#990000', '#aa0000']
-                },
-            series: [
-            {
-                name: "关键时间节点疫情比较",
-                type: "map",
-                mapType: "china",
-                roam: true,
-                zoom:1.2,//默认地图在容器中显示zoom:1,可根据需求放大缩小地图
-                itemStyle:{
-                    areaColor:'#ff0000',//地图区域背景颜色
-                    borderColor:'#fff'//地图边界颜色
-                },
-                // emphasis:{//高亮时的设置
-                //     itemStyle:{
-                //         areaColor:'#81B5F9',//高亮时地图区域背景颜色
-                //     },
-                //     label:{//文字颜色，样式在此处
-                //         color:'rgb(230, 102, 18)',
-                //         fontSize:'15'
-                //     }
-                // },
-                label: {
-                    normal: {
-                        show: false
-                    },
-                },
-                data: [
-                    {name: "广东", value: 100},
-                    {name: "湖南", value: 300}
-                ]
-            }]
+            visualMap: baseVisualMap,
+            series: baseMapSeries
         },
         nowMapOption: {
             title: {
                 text: "现在疫情形势"
             },
-            // tooltip:{//鼠标移上去时显示悬浮框
-            //     backgroundColor:'transparent',//悬浮框最外层设置了默认padding;5,背景色灰色，如果要自定义，设置padding:0;或者背景色透明。
-            //     padding:0,
-            //     //trigger:'item'//设置该属性之后，会与series中data数据对应，如上图。注意data中对象的键名为name。如果单纯的展示数据可用此属性，不与formatter同用。
-            // },
-            visualMap: {
-                show : true,
-                x: 'left',
-                y: 'center',
-                splitList: [
-                {start: 400, end: 500},{start: 300, end: 400},
-                {start: 200, end: 300},{start: 100, end: 200},
-                {start: 0, end: 100},
-                ],
-                color: ['#110000', '#330000','#660000', '#990000', '#aa0000']
-                },
-            series: [
-            {
-                name: "关键时间节点疫情比较",
-                type: "map",
-                map: "china",
-                roam: false,
-                zoom:1.2,//默认地图在容器中显示zoom:1,可根据需求放大缩小地图
-                itemStyle:{
-                    areaColor:'#ff0000',//地图区域背景颜色
-                    borderColor:'#fff'//地图边界颜色
-                },
-                // emphasis:{//高亮时的设置
-                //     itemStyle:{
-                //         areaColor:'#81B5F9',//高亮时地图区域背景颜色
-                //     },
-                //     label:{//文字颜色，样式在此处
-                //         color:'rgb(230, 102, 18)',
-                //         fontSize:'15'
-                //     }
-                // },
-                label: {
-                    normal: {
-                        show: false
-                    },
-                },
-                data: [
-                    {name: "广东", value: 100},
-                    {name: "湖南", value: 300}
-                ]
-            }]
+            visualMap: baseVisualMap,
+            series: baseMapSeries
         },
         afterMapOption: {
             title: {
                 text: "未来疫情形势"
             },
-            // tooltip:{//鼠标移上去时显示悬浮框
-            //     backgroundColor:'transparent',//悬浮框最外层设置了默认padding;5,背景色灰色，如果要自定义，设置padding:0;或者背景色透明。
-            //     padding:0,
-            //     //trigger:'item'//设置该属性之后，会与series中data数据对应，如上图。注意data中对象的键名为name。如果单纯的展示数据可用此属性，不与formatter同用。
-            // },
-            visualMap: {
-                show : true,
-                x: 'left',
-                y: 'center',
-                splitList: [
-                {start: 400, end: 500},{start: 300, end: 400},
-                {start: 200, end: 300},{start: 100, end: 200},
-                {start: 0, end: 100},
-                ],
-                color: ['#110000', '#330000','#660000', '#990000', '#aa0000']
-                },
-            series: [
-            {
-                name: "关键时间节点疫情比较",
-                type: "map",
-                map: "china",
-                roam: false,
-                zoom:1.2,//默认地图在容器中显示zoom:1,可根据需求放大缩小地图
-                itemStyle:{
-                    areaColor:'#ff0000',//地图区域背景颜色
-                    borderColor:'#fff'//地图边界颜色
-                },
-                // emphasis:{//高亮时的设置
-                //     itemStyle:{
-                //         areaColor:'#81B5F9',//高亮时地图区域背景颜色
-                //     },
-                //     label:{//文字颜色，样式在此处
-                //         color:'rgb(230, 102, 18)',
-                //         fontSize:'15'
-                //     }
-                // },
-                label: {
-                    normal: {
-                        show: false
-                    },
-                },
-                data: [
-                    {name: "广东", value: 100},
-                    {name: "湖南", value: 300}
-                ]
-            }]
+            visualMap: baseVisualMap,
+            series: baseMapSeries
         },
         slidermin: 0,
         slidermax: 1,
@@ -475,9 +405,11 @@
           columns: ['date', 'alpha'],
           rows: []
         },
+        selectedCity: "广东",
+        modelResult: [],
         form: {
           beta: 0.04,
-          te: 0,
+          te: 4,
           endDate: new Date(),
           city: '1',
           options: [{value:'0',label:'湖北'},{value:'1',label:'广东'},{value:'2',label:'河南'},{value:'3',label:'浙江'},{value:'4',label:'湖南'},{value:'5',label:'安徽'},{value:'6',label:'江西'},{value:'7',label:'江苏'},{value:'8',label:'重庆'},{value:'9',label:'山东'},{value:'10',label:'四川'},{value:'11',label:'黑龙江'},{value:'12',label:'北京'},{value:'13',label:'上海'},{value:'14',label:'河北'},{value:'15',label:'福建'},{value:'16',label:'广西'},{value:'17',label:'陕西'},{value:'18',label:'云南'},{value:'19',label:'海南'},{value:'20',label:'贵州'},{value:'21',label:'山西'},{value:'22',label:'天津'},{value:'23',label:'辽宁'},{value:'24',label:'甘肃'},{value:'25',label:'吉林'},{value:'26',label:'新疆'},{value:'27',label:'内蒙古'},{value:'28',label:'宁夏'},{value:'29',label:'青海'},{value:'30',label:'西藏'}],
@@ -530,7 +462,8 @@
 }
 
 .chinaMap {
-  width: 350px;
+  width: 100%;
   height: 350px;
+  color: #ff0505
 }
 </style>

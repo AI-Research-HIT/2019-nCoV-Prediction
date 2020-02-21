@@ -354,7 +354,7 @@
           beta: '',
           num: '',
           endDate: new Date(),
-          value: '',
+          value: 'shanghai',
           options: [{
             value: 'shanghai',
             label: '上海'
