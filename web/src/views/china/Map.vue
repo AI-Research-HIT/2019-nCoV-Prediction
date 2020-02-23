@@ -122,24 +122,9 @@
             </el-col>
         </el-row>
         <el-row>
-            <el-col :span="12">
-              <H3>人群聚集趋势</H3>
-
-              <div>
-                  <ve-line :data="lineMData" :settings="valLineSettings"></ve-line>
-              </div>
-            </el-col>
-            <el-col :span="12">
-              <H3>Alpha趋势</H3>
-
-              <div>
-                  <ve-line :data="lineAlphaData" :settings="valLineSettings"></ve-line>
-              </div>
-            </el-col>
-        </el-row>
-        <el-row>
-          <el-col>
-
+          <el-col :span="12">
+          <H3>新增确诊预测趋势</H3>
+          <ve-line :data="newChartData"></ve-line>
           </el-col>
         </el-row>
     </section>
@@ -184,7 +169,7 @@
       });
     },
     methods: {
-        drawLine(){
+      drawLine(){
             // 基于准备好的dom，初始化echarts实例
         predictChart = echarts.init(document.getElementById('predictChart'))
 
@@ -198,7 +183,7 @@
             xAxis: {
                 data: [],
                 axisLabel :{  
-                interval: 0,
+                interval: 5,
                 rotate:40 
             }
             },
@@ -248,38 +233,37 @@
         })
         .then(function (response) {
           //_this.lineTotalData.rows = []
-          _this.lineMData.rows = []
-          _this.lineAlphaData.rows = []
+          _this.newChartData.rows = []
           var dates = []
           var totalInfections = []
           var predictTotal = []
           var predictCure = []
           var predictDeath = []
           for (let i of response.data.data.actives) {
+            console.log(i)
             //var dicTotal = {}
-            var dicM = {}
-            var dicAlpha = {}
+            var dicNew = {}
             var newI = i['newInfection']
+            if (newI != 0) {
+              dicNew['真实新增确诊'] = newI
+            }
+            dicNew['预测新增确诊'] = i['predictNew']
             var totalI = i['totalInfection']
             predictTotal.push(i['predictTotal'])
             //dicTotal['date'] = i['date']
-            dicM['date'] = i['date']
-            dicAlpha['date'] = i['date']
+            dicNew['date'] = i['date']
             dates.push(i['date'])
             if (totalI != 0) {
                 //dicTotal['累计确诊'] = totalI
                 totalInfections.push(totalI)
             }
+            
             predictCure.push(i['predictRecover'])
             predictDeath.push(i['predictDeath'])
             // dicTotal['预测累计确诊'] = i['predictTotal']
             // dicTotal['预测累计治愈'] = i['predictRecover']
             // dicTotal['预测累计死亡'] = i['predictDeath']
-            dicM['m'] = i['mval']
-            dicAlpha['alpha'] = i['alpha']
-            //_this.lineTotalData.rows.push(dicTotal)
-            _this.lineMData.rows.push(dicM)
-            _this.lineAlphaData.rows.push(dicAlpha)
+            _this.newChartData.rows.push(dicNew)
           }
           // 绘制图表
             predictChart.setOption({
@@ -331,8 +315,8 @@
           columns: ['date', '累计确诊', '预测累计确诊', '预测累计治愈', '预测累计死亡'],
           rows: []
         },
-        lineMData: {
-          columns: ['date', 'm'],
+        newChartData: {
+          columns: ["date", '真实新增确诊', '预测新增确诊',],
           rows: []
         },
         lineAlphaData: {

@@ -17,8 +17,8 @@ import VCharts from 'v-charts'
 import './icons'
 
 import axios from 'axios'
-//axios.defaults.baseURL='http://47.75.202.128:8080'
-axios.defaults.baseURL='http://localhost:8081'
+axios.defaults.baseURL='http://47.75.202.128:8080'
+//axios.defaults.baseURL='http://localhost:8081'
 
 Vue.prototype.$axios = axios
 
@@ -35,15 +35,21 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   //NProgress.start();
-  if (to.path == '/login') {
-    sessionStorage.removeItem('user');
-  }
-  let user = JSON.parse(sessionStorage.getItem('user'));
-  if (!user && to.path != '/login') {
-    next({ path: '/login' })
+  
+  if (to.path == '/') {
+    next({ path: '/china'})
   } else {
     next()
   }
+  // if (to.path == '/login') {
+  //   sessionStorage.removeItem('user');
+  // }
+  // let user = JSON.parse(sessionStorage.getItem('user'));
+  // if (!user && to.path != '/login') {
+  //   next({ path: '/login' })
+  // } else {
+  //   next()
+  // }
 })
 
 //router.afterEach(transition => {

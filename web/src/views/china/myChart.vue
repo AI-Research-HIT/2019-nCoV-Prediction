@@ -105,7 +105,7 @@ function parsejson(jsdata) {
 // axios.get('static/2019-nCoV-data.json').then(s=>{
 //     console.log(s.data);
 // });
-axios.get("static/2019-nCov-data.json").then(s => {
+axios.get("static/2019-nCoV-data.json").then(s => {
   var loadjson = s.data;
   // console.log(loadjson);
   parsejson(loadjson);

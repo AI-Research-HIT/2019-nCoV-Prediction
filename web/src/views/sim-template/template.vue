@@ -45,20 +45,10 @@
             </el-col>
         </el-row>
                 <el-row>
-            <el-col :span="12">
-              <H3>接触人数与感染数量关系</H3>
-
-              <div>
-                  <ve-line :data="lineMData" :settings="valLineSettings"></ve-line>
-              </div>
-            </el-col>
-            <el-col :span="12">
-              <H3>Alpha与感染数量关系</H3>
-
-              <div>
-                  <ve-line :data="lineAlphaData" :settings="valLineSettings"></ve-line>
-              </div>
-            </el-col>
+          <el-col :span="12">
+          <H3>新增确诊预测趋势</H3>
+          <ve-line :data="newChartData"></ve-line>
+          </el-col>
         </el-row>
             <el-row>
                 <H2>疫情时间节点对比</H2>
@@ -178,8 +168,9 @@
             chinaChartBefore.setOption(this.beforeMapOption)
 
             if (idx == 0) {
-                idx = data.length/2
+                idx = parseInt(data.length/2)
             }
+            console.log(idx)
             var now = {name:this.selectedCity, value:data[idx]['predictTotal']}
             this.nowMapOption.series[0].data = []
             this.nowMapOption.series[0].data.push(now)
@@ -221,7 +212,7 @@
             xAxis: {
                 data: [],
                 axisLabel :{  
-                interval: 0,
+                interval: 5,
                 rotate:40 
             }
             },
@@ -272,6 +263,7 @@
           //_this.lineTotalData.rows = []
           _this.lineMData.rows = []
           _this.lineAlphaData.rows = []
+          _this.newChartData.rows = []
           dates = []
           var totalInfections = []
           var predictTotal = []
@@ -287,9 +279,14 @@
           _this.modelResult = actives
           for (let i of actives) {
             //var dicTotal = {}
+            var dicNew = {}
             var dicM = {}
             var dicAlpha = {}
             var newI = i['newInfection']
+            if (newI != 0) {
+              dicNew['真实新增确诊'] = newI
+            }
+            dicNew['预测新增确诊'] = i['predictNew']
             var totalI = i['totalInfection']
             predictTotal.push(i['predictTotal'])
             //dicTotal['date'] = i['date']
@@ -300,6 +297,7 @@
             dicM['date'] = i['date']
             dicAlpha['date'] = i['date']
             dates.push(i['date'])
+            dicNew['date'] = i['date']
             if (totalI != 0) {
                 //dicTotal['累计确诊'] = totalI
                 totalInfections.push(totalI)
@@ -314,6 +312,7 @@
             //_this.lineTotalData.rows.push(dicTotal)
             _this.lineMData.rows.push(dicM)
             _this.lineAlphaData.rows.push(dicAlpha)
+            _this.newChartData.rows.push(dicNew)
             idxj++
           }
         _this.calMapDate(actives, findIdx)
@@ -392,6 +391,10 @@
             visualMap: baseVisualMap,
             series: baseMapSeries
         },
+        newChartData: {
+          columns: ["date", '真实新增确诊', '预测新增确诊',],
+          rows: []
+        },
         slidermin: 0,
         slidermax: 1,
         slidervalue: [0, 1],
@@ -465,5 +468,9 @@
   width: 100%;
   height: 350px;
   color: #ff0505
+}
+
+.slider {
+    margin-bottom: 40px;
 }
 </style>
