@@ -228,7 +228,7 @@
         method: 'post',
         url: '/api/model-cal',
 
-        data: JSON.stringify({city:this.form.value,
+        data: JSON.stringify({province:this.form.value,
                           predictDay: day})
 
         })

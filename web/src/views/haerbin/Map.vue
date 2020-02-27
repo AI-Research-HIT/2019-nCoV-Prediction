@@ -142,7 +142,7 @@
         method: 'post',
         url: '/api/model-cal',
 
-        data: JSON.stringify({city: "haerbin",
+        data: JSON.stringify({province: "haerbin",
                           predictDay: day})
 
         })
