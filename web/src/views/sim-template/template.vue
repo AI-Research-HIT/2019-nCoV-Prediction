@@ -44,14 +44,15 @@
                 <div class="lschart" id="predictChart"></div>    
             </el-col>
         </el-row>
-                <el-row>
+                <!-- <el-row>
           <el-col :span="12">
           <H3>新增确诊预测趋势</H3>
-          <ve-line :data="newChartData"></ve-line>
+          <ve-line :data="newChartData" :setting="newChartSettings"></ve-line>
           </el-col>
-        </el-row>
+        </el-row> -->
             <el-row>
                 <H2>疫情时间节点对比</H2>
+                <p>中间地图为计算时间区间中间时间的疫情情况，左右两图为下面滑动点控制的时间节点</p>
             <el-col :span="8">
               <div class="chinaMap" id="chinaMapBefore">
               </div>
@@ -66,6 +67,7 @@
             </el-col>
         </el-row>
         <H3>拖动选择上图对比日期</H3>
+        <p>两边滑动点分别控制以上左右图的显示时间，以比较不同时间节点的疫情情况</p>
           <div class="slider">
             <el-slider
             v-model="slidervalue"
@@ -139,21 +141,21 @@
             return dates[val]
         },
         sliderChange() {
-            console.log(this.slidervalue)
+            //console.log(this.slidervalue)
             if (this.modelResult.length > 0) {
                 if (this.slidervalue[0] >= 0 && this.slidervalue[0] < this.modelResult.length) {
                     var before = {name:this.selectedCity, value:this.modelResult[this.slidervalue[0]]['predictTotal']}
-                    console.log(before)
+                    //console.log(before)
                     this.beforeMapOption.series[0].data = []
                     this.beforeMapOption.series[0].data.push(before)
-                    this.beforeMapOption.title.text = "疫情初期形势 " + this.modelResult[this.slidervalue[0]]['date'] + "：预测确诊" + before.value
+                    this.beforeMapOption.title.text = this.modelResult[this.slidervalue[0]]['date'] + "：预测确诊" + before.value
                     chinaChartBefore.setOption(this.beforeMapOption)
                 }
 
                 if (this.slidervalue[1] >= 0 && this.slidervalue[1] < this.modelResult.length) {
                     var after = {name:this.selectedCity, value:this.modelResult[this.slidervalue[1]]['predictTotal']}
-                    console.log(after)
-                    this.afterMapOption.title.text = "未来疫情形势 " + this.modelResult[this.slidervalue[1]]['date'] + "：预测确诊" + after.value
+                    //console.log(after)
+                    this.afterMapOption.title.text = this.modelResult[this.slidervalue[1]]['date'] + "：预测确诊" + after.value
                     this.afterMapOption.series[0].data = []
                     this.afterMapOption.series[0].data.push(after)
                     chinaChartAfter.setOption(this.afterMapOption)
@@ -164,21 +166,21 @@
             var before = {name:this.selectedCity, value:data[0]['predictTotal']}
             this.beforeMapOption.series[0].data = []
             this.beforeMapOption.series[0].data.push(before)
-            this.beforeMapOption.title.text = "疫情初期形势 " + data[0]['date']  + "：预测确诊" + before.value
+            this.beforeMapOption.title.text = data[0]['date']  + "：预测确诊" + before.value
             chinaChartBefore.setOption(this.beforeMapOption)
 
             if (idx == 0) {
                 idx = parseInt(data.length/2)
             }
-            console.log(idx)
+            //console.log(idx)
             var now = {name:this.selectedCity, value:data[idx]['predictTotal']}
             this.nowMapOption.series[0].data = []
             this.nowMapOption.series[0].data.push(now)
-            this.nowMapOption.title.text = "现在疫情形势 " + data[idx]['date']  + "：预测确诊" + now.value
+            this.nowMapOption.title.text = data[idx]['date']  + "：预测确诊" + now.value
             chinaChartNow.setOption(this.nowMapOption)
 
             var after = {name:this.selectedCity, value:data[data.length-1]['predictTotal']}
-            this.afterMapOption.title.text = "未来疫情形势 " + data[data.length-1]['date']  + "：预测确诊" + after.value
+            this.afterMapOption.title.text = data[data.length-1]['date']  + "：预测确诊" + after.value
             this.afterMapOption.series[0].data = []
             this.afterMapOption.series[0].data.push(after)
             chinaChartAfter.setOption(this.afterMapOption)
@@ -359,15 +361,17 @@
         })
     },
     onProvinceChange() {
-        this.selectedCity = this.form.options[this.form.city].label
+      for (let i of this.form.options) {
+        if (i.value == this.form.city) {
+          this.selectedCity = i.label
+        }
+      }
     }
   },
     data () {
-        this.valLineSettings = {
-        xAxisType: 'category'
-      }
-      this.lineChartSettings = {
-        xAxisType: 'category'
+      this.newChartSettings = {
+        xAxisType: 'category',
+        yAxisName: ['新增数量']
       }
       return {
         beforeMapOption: {
@@ -408,14 +412,14 @@
           columns: ['date', 'alpha'],
           rows: []
         },
-        selectedCity: "广东",
+        selectedCity: "广东省",
         modelResult: [],
         form: {
           beta: 0.04,
           te: 4,
           endDate: new Date(),
-          city: '1',
-          options: [{value:'0',label:'湖北'},{value:'1',label:'广东'},{value:'2',label:'河南'},{value:'3',label:'浙江'},{value:'4',label:'湖南'},{value:'5',label:'安徽'},{value:'6',label:'江西'},{value:'7',label:'江苏'},{value:'8',label:'重庆'},{value:'9',label:'山东'},{value:'10',label:'四川'},{value:'11',label:'黑龙江'},{value:'12',label:'北京'},{value:'13',label:'上海'},{value:'14',label:'河北'},{value:'15',label:'福建'},{value:'16',label:'广西'},{value:'17',label:'陕西'},{value:'18',label:'云南'},{value:'19',label:'海南'},{value:'20',label:'贵州'},{value:'21',label:'山西'},{value:'22',label:'天津'},{value:'23',label:'辽宁'},{value:'24',label:'甘肃'},{value:'25',label:'吉林'},{value:'26',label:'新疆'},{value:'27',label:'内蒙古'},{value:'28',label:'宁夏'},{value:'29',label:'青海'},{value:'30',label:'西藏'}],
+          city: '广东省',
+          options: [{value:"湖北省",label:"湖北"},{value:"广东省",label:"广东"},{value:"河南省",label:"河南"},{value:"浙江省",label:"浙江"},{value:"湖南省",label:"湖南"},{value:"安徽省",label:"安徽"},{value:"江西省",label:"江西"},{value:"江苏省",label:"江苏"},{value:"重庆市",label:"重庆"},{value:"山东省",label:"山东"},{value:"四川省",label:"四川"},{value:"黑龙江省",label:"黑龙江"},{value:"北京市",label:"北京"},{value:"上海市",label:"上海"},{value:"河北省",label:"河北"},{value:"福建省",label:"福建"},{value:"广西壮族自治区",label:"广西"},{value:"陕西省",label:"陕西"},{value:"云南省",label:"云南"},{value:"海南省",label:"海南"},{value:"贵州省",label:"贵州"},{value:"山西省",label:"山西"},{value:"天津市",label:"天津"},{value:"辽宁省",label:"辽宁"},{value:"甘肃省",label:"甘肃"},{value:"吉林省",label:"吉林"},{value:"新疆维吾尔自治区",label:"新疆"},{value:"内蒙古自治区",label:"内蒙古"},{value:"宁夏回族自治区",label:"宁夏"},{value:"青海省",label:"青海"},{value:"西藏自治区",label:"西藏"}],
         comp: [20, 30]
         },
       timeline: 10

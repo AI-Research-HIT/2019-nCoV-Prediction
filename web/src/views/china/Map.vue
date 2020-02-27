@@ -84,7 +84,8 @@
     </el-col>
     <el-col>
       <H3>城市聚集指数对比</H3>
-      <ve-histogram :data="veData" :settings="valLineSettings"></ve-histogram>
+      <p>我们在模型中引入了一个人员聚集度指标m，相比人口流动及出行强度，该指标更能综合反映政府的管控力度，因为人员聚集度越高，病毒的传染力就越强，而管理力度越强，聚集度则越小，疫情则将逐步得到控制。然而该指标并不能直接获得，可以通过历史数据反演计算得到，也可以在模拟仿真预测时进行动态调整。</p>
+      <ve-histogram :data="veData"></ve-histogram>
     </el-col>
     <el-col>
                     <H3>全国各城市累计/新增人数</H3>
@@ -97,7 +98,7 @@
 		<!--工具条-->
 			<el-form ref="form" :model="form" class="sim-input">
         <H3>趋势预测</H3>
-                <el-form-item label="计算时间区间: ">
+                <el-form-item label="仿真计算结束时间: ">
                     <el-col :span="5">
           <el-date-picker v-model="form.endDate" type="date" placeholder="结束日期" style="width: 100%;"></el-date-picker>
           </el-col>
@@ -117,14 +118,14 @@
         </el-form-item>
 			</el-form>
         <el-row>
-            <el-col :span="15">
+            <el-col :span="20">
               <div class="lschart" id="predictChart"></div>
             </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="20">
           <H3>新增确诊预测趋势</H3>
-          <ve-line :data="newChartData"></ve-line>
+          <ve-line :data="newChartData" :settings="chartSetting"></ve-line>
           </el-col>
         </el-row>
     </section>
@@ -240,7 +241,6 @@
           var predictCure = []
           var predictDeath = []
           for (let i of response.data.data.actives) {
-            console.log(i)
             //var dicTotal = {}
             var dicNew = {}
             var newI = i['newInfection']
@@ -300,11 +300,9 @@
     }
   },
     data () {
-      this.valLineSettings = {
-        xAxisType: 'category'
-      }
-      this.lineChartSettings = {
-        xAxisType: 'category'
+      this.chartSetting = {
+        xAxisType: 'time',
+        yAxisName: ['新增数量']
       }
       return {
         veData: {
@@ -338,7 +336,7 @@
           beta: '',
           num: '',
           endDate: new Date(),
-          value: 'shanghai',
+          value: 'guangzhou',
           options: [{
             value: 'shanghai',
             label: '上海'

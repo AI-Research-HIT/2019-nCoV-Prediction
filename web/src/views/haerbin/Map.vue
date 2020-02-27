@@ -13,7 +13,7 @@
         </el-form-item>
 			</el-form>
       <el-row>
-            <el-col :span="15">
+            <el-col :span="20">
               <div class="lschart" id="predictChart"></div>
             </el-col>
         </el-row>
@@ -21,27 +21,32 @@
           <el-col>
           </el-col>
         </el-row>
-         <el-row>
-          <el-col :span="12">
+         <!-- <el-row>
+          <el-col :span="20">
           <H3>新增确诊预测趋势</H3>
-          <ve-line :data="newChartData"></ve-line>
+          <ve-line :data="newChartData" :settings="chartSetting"></ve-line>
           </el-col>
-        </el-row>
+        </el-row> -->
       <el-row>
         
-        <el-col :span="12">
+        <el-col :span="20">
           <H3>哈尔滨人员聚集度分析</H3>
-          <ve-line :data="mChartData"></ve-line>
-        </el-col>
-        <el-col :span="12">
-          <H3>湖北移动来哈尔滨人数</H3>
-          <ve-line :data="ChinaMobileChartData"></ve-line>
+          <p>根据SEIQR模型以及哈市卫健委公布的确诊病例数据，我们对本市人员聚集度进行了反演推算，如图所示，可见在2月5日前后聚集度有较明显的降低，这与2月4日哈尔滨政府公布的第8号公告宣布对所有小区村屯实施封闭管理相符。另外，我们看到从1月24日至今，人员聚集度下降很快，这在一定程度上反应了省市政府应对疫情响应积极，管控有效，人民群众防控意识提升等事实。</p>
+          <ve-line :data="mChartData" :settings="mChartSetting"></ve-line>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="12">
+        <h3>人口流动数据分析</h3>
+        <p>疫情的发展不仅与城市间的人口流动密切相关，还与市内人员出行、人员聚集等因素密切相关，同时这些因素也是政府管控政策的制定依据。为此我们通过疫情数据、移动运营商人口流动数据及百度出行数据进行了如下分析。</p>
+        <el-col :span="20">
+          <H3>湖北移动来哈尔滨人数</H3>
+          <ve-line :data="ChinaMobileChartData" :settings="chartSetting"></ve-line>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="20">
           <H3>哈尔滨百度城市出行强度</H3>
-          <ve-line :data="BaiduChartData"></ve-line>
+          <ve-line :data="BaiduChartData" :settings="baiduChartSetting"></ve-line>
         </el-col>
       </el-row>
     </section>
@@ -203,6 +208,18 @@
       }
   },
     data () {
+      this.chartSetting = {
+        xAxisType: 'category',
+        yAxisName: ['人数']
+      }
+      this.mChartSetting = {
+        xAxisType: 'category',
+        yAxisName: ['聚集度']
+      }
+      this.baiduChartSetting = {
+        xAxisType: 'category',
+        yAxisName: ['出行强度']
+      }
       return {
         form: {
           endDate: new Date()

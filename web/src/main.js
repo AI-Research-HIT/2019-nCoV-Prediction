@@ -17,8 +17,8 @@ import VCharts from 'v-charts'
 import './icons'
 
 import axios from 'axios'
-axios.defaults.baseURL='http://47.75.202.128:8080'
-//axios.defaults.baseURL='http://localhost:8081'
+//axios.defaults.baseURL='https://ncov.embedded-ai.org'
+axios.defaults.baseURL='http://localhost:8081'
 
 Vue.prototype.$axios = axios
 

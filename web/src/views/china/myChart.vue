@@ -436,7 +436,7 @@ export default {
     });
     myChart.on("click", param => {
       event.stopPropagation();
-      console.log(param);
+      //console.log(param);
       if (citymap[param.name] != null) {
         for (var i = 0; i < days.length; i++) {
           provinceoption.options[i].series[1].data =
@@ -445,7 +445,7 @@ export default {
           provinceoption.options[i].title[1].text =
             param.name + "疫情累计/新增确诊趋势图";
         }
-        console.log(provinceoption);
+        //console.log(provinceoption);
         myChart.setOption(provinceoption, true);
       } else if (param.name.length != 5) {
         // console.log("1");
