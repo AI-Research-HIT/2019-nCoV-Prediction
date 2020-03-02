@@ -2,11 +2,11 @@ import Login from './views/Login.vue'
 import NotFound from './views/404.vue'
 import Home from './views/Home.vue'
 import Main from './views/Main.vue'
-import echarts from './views/charts/echarts.vue'
 import ChinaAna from './views/china/Map.vue'
 import HaerbinAna from './views/haerbin/Map.vue'
 import SimTemplate from './views/sim-template/template.vue'
 import SEIBRModel from './views/SEIBR-model/SEIBR-model.vue'
+import Team from './views/team/Team.vue'
 
 import { mapActions } from 'vuex'
 
@@ -58,9 +58,19 @@ let routes = [
         component: Home,
         name: '',
         leaf: true,
-        iconCls: 'el-icon-data-analysis',
+        iconCls: 'el-icon-notebook-2',
         children: [
             { path: '/model', component: SEIBRModel, name: 'SEIQR模型详解' },
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: '',
+        leaf: true,
+        iconCls: 'el-icon-s-custom',
+        children: [
+            { path: '/team', component: Team, name: '团队成员' },
         ]
     },
     {

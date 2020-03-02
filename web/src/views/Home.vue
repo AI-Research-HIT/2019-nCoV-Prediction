@@ -9,6 +9,10 @@
 					<i class="fa fa-align-justify"></i>
 				</div>
 			</el-col>
+			<el-col :span="8" class="userinfo">
+				<span class="userinfo-inner"><img src="/static/assets/image/AI-Research-HIT.png" /><h3 class="title">哈尔滨工业大学人工智能研究院</h3> </span>
+			</el-col>
+
 			<!-- <el-col :span="4" class="userinfo">
 				<el-dropdown trigger="hover">
 					<span class="el-dropdown-link userinfo-inner"><img :src="this.sysUserAvatar" /> {{sysUserName}}</span>
@@ -66,8 +70,23 @@
 						</transition>
 					</el-col>
 				</div>
+				<el-footer class="content-foot">
+						<p style="font-size: 25px;color: #409EFF">合作单位</p>
+					<el-row>
+						<el-col :span="5" :offset="7">
+							<img style="width: 25%;height: 25%" src="/static/assets/image/AI-Research-HIT.png">
+						</el-col>
+						<el-col :span="5">
+							<img style="width: 65%;height: 65%" src="/static/assets/image/china-mobile.png">
+						</el-col>
+					</el-row>
+					<p style="margin-top:30px">哈尔滨工业大学人工智能研究院，copyright 2020</p>
+				</el-footer>
+
 			</section>
+						
 		</el-col>
+
 	</el-row>
 </template>
 
@@ -166,6 +185,9 @@
 						float: right;
 					}
 				}
+				.title {
+					margin: 0px;
+				}
 			}
 			.logo {
 				//width:230px;
@@ -263,6 +285,10 @@
 				.content-wrapper {
 					background-color: #fff;
 					box-sizing: border-box;
+				}
+				.content-foot {
+					margin-top: 10px;
+					text-align: center;
 				}
 			}
 		}

@@ -168,6 +168,8 @@
             if (totalI != 0) {
                 //dicTotal['累计确诊'] = totalI
                 totalInfections.push(totalI)
+            } else {
+              totalInfections.push('')
             }
             predictCure.push(i['predictRecover'])
             predictDeath.push(i['predictDeath'])

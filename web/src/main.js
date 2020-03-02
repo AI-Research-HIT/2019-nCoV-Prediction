@@ -15,9 +15,10 @@ import routes from './routes'
 import 'font-awesome/css/font-awesome.min.css'
 import VCharts from 'v-charts'
 import './icons'
+import baseUrl from './baseUrl'
 
 import axios from 'axios'
-axios.defaults.baseURL='https://ncov.embedded-ai.org'
+axios.defaults.baseURL=baseUrl
 //axios.defaults.baseURL='http://localhost:8081'
 
 Vue.prototype.$axios = axios
