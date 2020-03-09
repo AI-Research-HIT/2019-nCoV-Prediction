@@ -142,7 +142,9 @@
         method: 'post',
         url: '/api/model-cal',
 
-        data: JSON.stringify({province: "haerbin",
+        data: JSON.stringify({province: "黑龙江省",
+                          city: 230100,
+                          template: 1,
                           predictDay: day})
 
         })

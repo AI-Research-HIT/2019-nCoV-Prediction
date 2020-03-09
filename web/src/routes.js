@@ -7,6 +7,7 @@ import HaerbinAna from './views/haerbin/Map.vue'
 import SimTemplate from './views/sim-template/template.vue'
 import SEIBRModel from './views/SEIBR-model/SEIBR-model.vue'
 import Team from './views/team/Team.vue'
+import MonteCarlo from './views/montecarlo/montecarlo.vue'
 
 import { mapActions } from 'vuex'
 
@@ -51,6 +52,16 @@ let routes = [
         iconCls: 'el-icon-data-analysis',
         children: [
             { path: '/haerbin', component: HaerbinAna, name: '哈尔滨疫情深入分析' },
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: '',
+        leaf: true,
+        iconCls: 'el-icon-data-analysis',
+        children: [
+            { path: '/montecarlo', component: MonteCarlo, name: '蒙特卡洛仿真' },
         ]
     },
     {

@@ -224,11 +224,24 @@
           });
         return
       }
+
+      var provinceCity = this.form.value.split('-')
+      var province = ''
+      var city = 0
+      if (provinceCity.length == 1) {
+        province = provinceCity[0]
+      } else if (provinceCity.length == 2) {
+        province = provinceCity[0]
+        city = parseInt(provinceCity[1])
+        
+      }
       this.$axios({
         method: 'post',
         url: '/api/model-cal',
 
-        data: JSON.stringify({province:this.form.value,
+        data: JSON.stringify({province:province,
+                          city: city,
+                          template: 1,
                           predictDay: day})
 
         })
@@ -338,54 +351,54 @@
           beta: '',
           num: '',
           endDate: new Date(),
-          value: 'guangzhou',
+          value: '广东省-440100',
           options: [{
-            value: 'shanghai',
+            value: '上海市',
             label: '上海'
             }, {
-              value: 'beijing',
+              value: '北京市',
               label: '北京'
             }, {
-              value: 'chengdu',
+              value: '四川省-510100',
               label: '成都'
             }, {
-              value: 'fuzhou',
+              value: '福建省-350100',
               label: '福州'
             }, {
-              value: 'guangzhou',
+              value: '广东省-440100',
               label: '广州'
             },{
-              value: 'haerbin',
+              value: '黑龙江省-230100',
               label: '哈尔滨'
             }, {
-              value: 'haikou',
+              value: '海南省-460100',
               label: '海口'
             }, {
-              value: 'hangzhou',
+              value: '浙江省-330100',
               label: '杭州'
             }, {
-              value: 'hefei',
+              value: '安徽省-340100',
               label: '合肥'
             },{
-              value: 'nanchang',
+              value: '江西省-360100',
               label: '南昌'
             },{
-              value: 'tianjing',
+              value: '天津市',
               label: '天津'
             },{
-              value: 'xian',
+              value: '陕西省-610100',
               label: '西安'
             },{
-              value: 'changsha',
+              value: '湖南省-430100',
               label: '长沙'
             },{
-              value: 'zhengzhou',
+              value: '河南省-410100',
               label: '郑州'
             },{
-              value: 'chongqing',
+              value: '重庆市',
               label: '重庆'
             },{
-              value: 'wuhan',
+              value: '湖北省-420100',
               label: '武汉'
             }
             ],

@@ -51,7 +51,7 @@
         <h4>仿真条件</h4>
         <el-form-item label="传染系数">
           <el-col :span="5">
-              <el-input-number v-model="form.beta" :precision="3" :step="0.01" :max="10"></el-input-number>
+              <el-input-number v-model="form.beta" :precision="3" :step="0.001" :max="10"></el-input-number>
           </el-col >
         </el-form-item>
         <el-form-item label="人员聚集度">
@@ -65,11 +65,15 @@
           </el-col >
           </el-row>
         </el-form-item>
-        <el-form-item label="潜伏期天数">
-            <el-col :span="5">
-            <el-input-number v-model="form.te" :min="1" :max="24"></el-input-number>
-          	<!-- <el-input v-model="form.te" placeholder="病毒潜伏时间"></el-input> -->
-          </el-col>
+        <el-form-item label="从发病到就诊时间">
+          <el-row>
+            <el-col>
+                <p class="text">发病到就诊时间列表格式为:0-10;3-4;8-1, 表示从第0天开始发病到就诊时间为10天, 第3天开始发病到就诊时间为4天, 第8天开始发病到就诊时间为1天</p>
+            </el-col>
+          <el-col :span="5">
+            <el-input v-model="form.trementlist" placeholder="样例: 0-10.0;3-4.0;8-1.0"></el-input>
+          </el-col >
+          </el-row>
         </el-form-item>
         <el-form-item label="结束日期">
             <el-col :span="5">
@@ -86,41 +90,12 @@
                 <div class="lschart" id="predictChart"></div>    
             </el-col>
         </el-row>
-                <!-- <el-row>
+        <el-row>
           <el-col :span="12">
           <H3>新增确诊预测趋势</H3>
           <ve-line :data="newChartData" :setting="newChartSettings"></ve-line>
           </el-col>
-        </el-row> -->
-            <el-row>
-                <H2>疫情时间节点对比</H2>
-                <p>中间地图为计算时间区间中间时间的疫情情况，左右两图为下面滑动点控制的时间节点</p>
-            <el-col :span="8">
-              <div class="chinaMap" id="chinaMapBefore">
-              </div>
-            </el-col>
-            <el-col :span="8">
-              <div class="chinaMap" id="chinaMapNow">
-              </div>
-            </el-col>
-            <el-col :span="8">
-              <div class="chinaMap" id="chinaMapAfter">
-              </div>
-            </el-col>
         </el-row>
-        <H3>拖动选择上图对比日期</H3>
-        <p>两边滑动点分别控制以上左右图的显示时间，以比较不同时间节点的疫情情况</p>
-          <div class="slider">
-            <el-slider
-            v-model="slidervalue"
-            range
-            :min="slidermin"
-            :max="slidermax"
-            :format-tooltip="formatTooltip"
-            @change="sliderChange"
-            :marks="slidermarks">
-            </el-slider>
-        </div>
 
     </section>
 
@@ -175,7 +150,6 @@
     },
     mounted() {
         this.drawLine();
-        this.drawMap();
     },
     methods: {
         parseMlist() {
@@ -212,70 +186,46 @@
 
           return list
         },
+        parseTreamentList() {
+          if (this.form.trementlist == '') {
+            return {}
+          }
+
+          var mlistStr = this.form.trementlist.replace(' ', '')
+
+          var mlist = mlistStr.split(';')
+
+          var list = {}
+
+          for (let m of mlist) {
+            var mpair = m.split('-',)
+            if (mpair.length != 2) {
+              throw '格式错误：天数与发病到就诊时间'
+            }
+            
+            var day = Number(mpair[0])
+            var m = Number(mpair[1])
+            if (isNaN(day) || isNaN(m)) {
+              throw '格式错误：天数与发病到就诊时间必须为整数'
+            }
+
+            if (!Number.isInteger(day)) {
+              throw '格式错误：天数必须为整数'
+            }
+            if (!Number.isInteger(m)) {
+              throw '格式错误：发病到就诊时间必须为整数'
+            }
+
+            list[day] = m
+
+          }
+
+          return list
+        },
         formatTooltip(val) {
             if (val >= 0 && val < dates.length)
             return dates[val]
         },
-        sliderChange() {
-            //console.log(this.slidervalue)
-            if (this.modelResult.length > 0) {
-                if (this.slidervalue[0] >= 0 && this.slidervalue[0] < this.modelResult.length) {
-                    var before = {name:this.selectedCity, value:this.modelResult[this.slidervalue[0]]['predictTotal']}
-                    //console.log(before)
-                    this.beforeMapOption.series[0].data = []
-                    this.beforeMapOption.series[0].data.push(before)
-                    this.beforeMapOption.title.text = this.modelResult[this.slidervalue[0]]['date'] + "：预测确诊" + before.value
-                    chinaChartBefore.setOption(this.beforeMapOption)
-                }
-
-                if (this.slidervalue[1] >= 0 && this.slidervalue[1] < this.modelResult.length) {
-                    var after = {name:this.selectedCity, value:this.modelResult[this.slidervalue[1]]['predictTotal']}
-                    //console.log(after)
-                    this.afterMapOption.title.text = this.modelResult[this.slidervalue[1]]['date'] + "：预测确诊" + after.value
-                    this.afterMapOption.series[0].data = []
-                    this.afterMapOption.series[0].data.push(after)
-                    chinaChartAfter.setOption(this.afterMapOption)
-                }
-            }
-        },
-        calMapDate(data, idx) {            
-            var before = {name:this.selectedCity, value:data[0]['predictTotal']}
-            this.beforeMapOption.series[0].data = []
-            this.beforeMapOption.series[0].data.push(before)
-            this.beforeMapOption.title.text = data[0]['date']  + "：预测确诊" + before.value
-            chinaChartBefore.setOption(this.beforeMapOption)
-
-            if (idx == 0) {
-                idx = parseInt(data.length/2)
-            }
-            //console.log(idx)
-            var now = {name:this.selectedCity, value:data[idx]['predictTotal']}
-            this.nowMapOption.series[0].data = []
-            this.nowMapOption.series[0].data.push(now)
-            this.nowMapOption.title.text = data[idx]['date']  + "：预测确诊" + now.value
-            chinaChartNow.setOption(this.nowMapOption)
-
-            var after = {name:this.selectedCity, value:data[data.length-1]['predictTotal']}
-            this.afterMapOption.title.text = data[data.length-1]['date']  + "：预测确诊" + after.value
-            this.afterMapOption.series[0].data = []
-            this.afterMapOption.series[0].data.push(after)
-            chinaChartAfter.setOption(this.afterMapOption)
-
-        },
-        drawMap() {
-            chinaChartBefore = echarts.init(
-                document.getElementById("chinaMapBefore")
-            );
-            chinaChartNow = echarts.init(
-                document.getElementById("chinaMapNow")
-            );
-            chinaChartAfter = echarts.init(
-                document.getElementById("chinaMapAfter")
-            );
-            chinaChartBefore.setOption(this.beforeMapOption);
-            chinaChartNow.setOption(this.nowMapOption);
-            chinaChartAfter.setOption(this.afterMapOption);
-            },
         drawLine(){
             // 基于准备好的dom，初始化echarts实例
         predictChart = echarts.init(document.getElementById('predictChart'))
@@ -349,16 +299,27 @@
         return
       }
 
+      var treamentlist = {}
+      try {
+        treamentlist = this.parseTreamentList()
+      } catch(err) {
+        this.$message({
+              message: err,
+              type: "warning",
+          });
+        return
+      }
+
       this.$axios({
         method: 'post',
-        url: '/api/model-cal',
+        url: '/api/simulate',
 
         data: JSON.stringify({province:province,
                           city: city,
                           predictDay: day,
                           beta: this.form.beta,
                           mlist: mlist,
-                          te: this.form.te})
+                          treamentDay: this.form.treamentDay})
 
         })
         .then(function (response) {
@@ -370,72 +331,54 @@
               return
           }
           //_this.lineTotalData.rows = []
-          _this.lineMData.rows = []
-          _this.lineAlphaData.rows = []
           _this.newChartData.rows = []
           dates = []
-          var totalInfections = []
-          var predictTotal = []
+          var totalConfirms = []
+          var predictTotalConfirm = []
           var predictCure = []
           var predictDeath = []
-          var actives = response.data.data.actives
+          var predictTotalInfections = []
+          var actives = response.data.data
 
-          _this.slidermax = actives.length-1
-          _this.slidervalue = [0, _this.slidermax]
-          var idxj = 0
-          var now = new Date()
-          var findIdx = 0
           _this.modelResult = actives
           for (let i of actives) {
             //var dicTotal = {}
             var dicNew = {}
+            var dicPredictNew = {}
             var dicM = {}
             var dicAlpha = {}
-            var newI = i['newInfection']
-            if (newI != 0) {
-              dicNew['真实新增确诊'] = newI
-            }
-            dicNew['预测新增确诊'] = i['predictNew']
-            var totalI = i['totalInfection']
-            predictTotal.push(i['predictTotal'])
+            var newI = i['realConfirmNew']
+            dicPredictNew['真实新增确诊'] = newI
+            dicPredictNew['预测新增确诊'] = i['confirmNew']
+            dicPredictNew['预测新增治愈'] = i['cureNew']
+            dicPredictNew['预测新增感染'] = i['infectedNew']
+            dicPredictNew['预测新增死亡'] = i['deadNew']
+            dicPredictNew['目前被感染人数'] = i['infectingCount']
+            dicPredictNew['目前正治疗人数'] = i['treamentingCount']
+            predictTotalInfections.push(i['infectedCount'])
+            var totalI = i['realConfirmCount']
+            predictTotalConfirm.push(i['infectedCount'])
             //dicTotal['date'] = i['date']
-            var itera = new Date(i['date'])
-            if (now.setHours(0, 0, 0, 0) == itera.setHours(0, 0, 0, 0)) {
-                findIdx = idxj                
-            }
-            dicM['date'] = i['date']
-            dicAlpha['date'] = i['date']
             dates.push(i['date'])
-            dicNew['date'] = i['date']
+            dicPredictNew['date'] = i['date']
             if (totalI != 0) {
                 //dicTotal['累计确诊'] = totalI
-                totalInfections.push(totalI)
+                totalConfirms.push(totalI)
             } else {
-              totalInfections.push('')
+              totalConfirms.push('')
             }
-            predictCure.push(i['predictRecover'])
-            predictDeath.push(i['predictDeath'])
+            predictCure.push(i['cureCount'])
+            predictDeath.push(i['deadCount'])
             // dicTotal['预测累计确诊'] = i['predictTotal']
             // dicTotal['预测累计治愈'] = i['predictRecover']
             // dicTotal['预测累计死亡'] = i['predictDeath']
             dicM['m'] = i['mval']
             dicAlpha['alpha'] = i['alpha']
             //_this.lineTotalData.rows.push(dicTotal)
-            _this.lineMData.rows.push(dicM)
-            _this.lineAlphaData.rows.push(dicAlpha)
-            _this.newChartData.rows.push(dicNew)
-            idxj++
+            
+            _this.newChartData.rows.push(dicPredictNew)
+            //_this.newChartData.rows.push(dicNew)
           }
-        _this.calMapDate(actives, findIdx)
-
-          var marks = {}
-          var idx = 0
-          for (let i of dates) {
-            i = i.replace("2020-", "")
-            marks[idx] = i
-            idx++
-          }
-        _this.slidermarks = marks
             // 绘制图表
             predictChart.setOption({
                 xAxis: {
@@ -443,17 +386,21 @@
                 },
                 legend: {
                     top: 40,
-                data: ['真实累计确诊', '预测累计确诊', '预测累计治愈', '预测累计死亡']
+                data: ['真实累计确诊', '预测累计感染', '预测累计确诊', '预测累计治愈', '预测累计死亡']
                 },
                 yAxis: {},
                 series: [{
                     name: '真实累计确诊',
                     type: 'scatter',
-                    data: totalInfections
+                    data: totalConfirms
+                },{
+                    name: '预测累计感染',
+                    type: 'line',
+                    data: predictTotalInfections
                 },{
                     name: '预测累计确诊',
                     type: 'line',
-                    data: predictTotal
+                    data: predictTotalConfirm
                 },{
                     name: '预测累计治愈',
                     type: 'line',
@@ -493,29 +440,8 @@
         yAxisName: ['新增数量']
       }
       return {
-        beforeMapOption: {
-            title: {
-                text: "疫情初期形势"
-            },
-            visualMap: baseVisualMap,
-            series: baseMapSeries
-        },
-        nowMapOption: {
-            title: {
-                text: "现在疫情形势"
-            },
-            visualMap: baseVisualMap,
-            series: baseMapSeries
-        },
-        afterMapOption: {
-            title: {
-                text: "未来疫情形势"
-            },
-            visualMap: baseVisualMap,
-            series: baseMapSeries
-        },
         newChartData: {
-          columns: ["date", '真实新增确诊', '预测新增确诊',],
+          columns: ["date", '真实新增确诊', '预测新增感染', '预测新增确诊', '预测新增治愈', '预测新增死亡', '目前被感染人数', '目前正治疗人数'],
           rows: []
         },
         slidermin: 0,
@@ -535,8 +461,8 @@
         modelResult: [],
         form: {
           beta: 0.05,
-          te: 4,
-          mlist: '',
+          trementlist: '0-8;10-4;20-2',
+          mlist: '0-15;10-8;20-3',
           endDate: new Date(),
           province: '广东省',
           provinceOptions: [{value:"湖北省",label:"湖北"},{value:"广东省",label:"广东"},{value:"河南省",label:"河南"},{value:"浙江省",label:"浙江"},{value:"湖南省",label:"湖南"},{value:"安徽省",label:"安徽"},{value:"江西省",label:"江西"},{value:"江苏省",label:"江苏"},{value:"重庆市",label:"重庆"},{value:"山东省",label:"山东"},{value:"四川省",label:"四川"},{value:"黑龙江省",label:"黑龙江"},{value:"北京市",label:"北京"},{value:"上海市",label:"上海"},{value:"河北省",label:"河北"},{value:"福建省",label:"福建"},{value:"广西壮族自治区",label:"广西"},{value:"陕西省",label:"陕西"},{value:"云南省",label:"云南"},{value:"海南省",label:"海南"},{value:"贵州省",label:"贵州"},{value:"山西省",label:"山西"},{value:"天津市",label:"天津"},{value:"辽宁省",label:"辽宁"},{value:"甘肃省",label:"甘肃"},{value:"吉林省",label:"吉林"},{value:"新疆维吾尔自治区",label:"新疆"},{value:"内蒙古自治区",label:"内蒙古"},{value:"宁夏回族自治区",label:"宁夏"},{value:"青海省",label:"青海"},{value:"西藏自治区",label:"西藏"}],
