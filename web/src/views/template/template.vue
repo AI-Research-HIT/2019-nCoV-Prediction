@@ -135,7 +135,7 @@
 
 <script>
   import CountTo from 'vue-count-to'
-  import myCharts from './myChart.vue'
+  import myCharts from './mapchart.vue'
   import echarts from "echarts";
 
   //import { simulate } from '../../api/api';
@@ -176,6 +176,9 @@
 
         predictChart.setOption({
             title: { text: '累计疫情趋势预测',
+                    textStyle: {
+                      fontSize: 17
+                    },
             top: 0 },
             grid: {
                 top: 100
@@ -256,10 +259,7 @@
           for (let i of response.data.data.actives) {
             //var dicTotal = {}
             var dicNew = {}
-            var newI = i['newInfection']
-            if (newI != 0) {
-              dicNew['真实新增确诊'] = newI
-            }
+            dicNew['真实新增确诊'] = i['newInfection']
             dicNew['预测新增确诊'] = i['predictNew']
             var totalI = i['totalInfection']
             predictTotal.push(i['predictTotal'])

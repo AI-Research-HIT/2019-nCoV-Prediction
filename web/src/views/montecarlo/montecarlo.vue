@@ -50,9 +50,14 @@
 		<el-form ref="form" :model="form" class="sim-input">
         <h4>仿真条件</h4>
         <el-form-item label="传染系数">
+          <el-row>
+            <el-col>
+                <p class="text">传染系数列表格式为:0-0.05;3-0.02;8-0.01, 表示从第0天开始传染系数为0.05, 第3天开始传染系数为0.02, 第8天开始人员传染系数0.01, 其中天数必须为整数</p>
+            </el-col>
           <el-col :span="5">
-              <el-input-number v-model="form.beta" :precision="3" :step="0.001" :max="10"></el-input-number>
+            <el-input v-model="form.betaList" placeholder="样例: 0-0.05;3-0.02;8-0.01"></el-input>
           </el-col >
+          </el-row>
         </el-form-item>
         <el-form-item label="人员聚集度">
           <el-row>
@@ -80,23 +85,39 @@
             <el-date-picker v-model="form.endDate" type="date" placeholder="计算结束时间"></el-date-picker>
             </el-col>
         </el-form-item> 
+                <el-form-item label="仿真次数">
+          <el-row>
+            <el-col>
+                <el-input-number v-model="form.simNum" :min="1" :max="100" label="仿真次数"></el-input-number>
+            </el-col>
+          </el-row>
+        </el-form-item>
 
         <el-form-item>
           <el-button type="primary" @click="onSubmit">开始仿真</el-button>
         </el-form-item>
 			</el-form>
         <el-row>
-            <el-col :span="15">
+            <el-col :span="20">
                 <div class="lschart" id="predictChart"></div>    
             </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="20">
           <H3>新增确诊预测趋势</H3>
           <ve-line :data="newChartData" :setting="newChartSettings"></ve-line>
           </el-col>
         </el-row>
+        <el-row>
+        <el-col :span="20">
+        <H3>疫情传播途径</H3>
+            <p>选择几个初始感染者，显示每个感染者的传播路径</p>
 
+              <div class='schart' id='schart'>
+                  <spreadChart :graphData="graphData"></spreadChart>
+              </div>
+        </el-col>
+        </el-row>
     </section>
 
 </template>
@@ -107,6 +128,7 @@
     import { simulate } from '../../api/api';
     import echarts from "echarts";
     import 'echarts/map/js/china.js'
+    import spreadChart from './spreadChart'
         
     var predictChart
     var dates = []
@@ -146,18 +168,35 @@
             }]
   export default {
     components: {
-        CountTo
+        CountTo,
+        'spreadChart': spreadChart
     },
     mounted() {
-        this.drawLine();
+        this.InitPredictLine();
+        this.autoResize()
     },
     methods: {
-        parseMlist() {
-          if (this.form.mlist == '') {
+        autoResize() {
+            var pchart = document.getElementById('predictChart')
+            var schart = document.getElementById('schart')
+            pchart.style.width = document.body.clientWidth * 0.7 + "px"
+            schart.style.width = document.body.clientWidth * 0.7 + "px"
+            predictChart.resize()
+
+            window.onresize = () => {
+                return (() => {
+                    pchart.style.width = document.body.clientWidth * 0.7 + "px"
+                    schart.style.width = document.body.clientWidth * 0.7 + "px"
+                    predictChart.resize()
+                })();
+            }
+        },
+        parsePairlist(strlist) {
+          if (strlist == '') {
             return {}
           }
 
-          var mlistStr = this.form.mlist.replace(' ', '')
+          var mlistStr = strlist.replace(' ', '')
 
           var mlist = mlistStr.split(';')
 
@@ -166,13 +205,13 @@
           for (let m of mlist) {
             var mpair = m.split('-',)
             if (mpair.length != 2) {
-              throw '格式错误：天数与聚集度值必须成对'
+              throw '格式错误：天数与值必须成对'
             }
             
             var day = Number(mpair[0])
             var m = Number(mpair[1])
             if (isNaN(day) || isNaN(m)) {
-              throw '格式错误：天数与聚集度值必须为数字'
+              throw '格式错误：天数与值必须为数字'
             }
 
             if (!Number.isInteger(day)) {
@@ -182,7 +221,6 @@
             list[day] = m
 
           }
-          console.log(list)
 
           return list
         },
@@ -226,7 +264,7 @@
             if (val >= 0 && val < dates.length)
             return dates[val]
         },
-        drawLine(){
+        InitPredictLine(){
             // 基于准备好的dom，初始化echarts实例
         predictChart = echarts.init(document.getElementById('predictChart'))
 
@@ -290,7 +328,7 @@
       }
       var mlist = {}
       try {
-        mlist = this.parseMlist()
+        mlist = this.parsePairlist(this.form.mlist)
       } catch(err) {
         this.$message({
               message: err,
@@ -310,6 +348,17 @@
         return
       }
 
+      var betaList = {}
+      try {
+          betaList = this.parsePairlist(this.form.betaList)
+      } catch(err) {
+                  this.$message({
+              message: err,
+              type: "warning",
+          });
+        return
+      }
+
       this.$axios({
         method: 'post',
         url: '/api/simulate',
@@ -317,8 +366,9 @@
         data: JSON.stringify({province:province,
                           city: city,
                           predictDay: day,
-                          beta: this.form.beta,
+                          beta: betaList,
                           mlist: mlist,
+                          simNum: this.form.simNum,
                           treamentDay: this.form.treamentDay})
 
         })
@@ -330,7 +380,9 @@
                 });
               return
           }
-          //_this.lineTotalData.rows = []
+
+          _this.graphData = response.data.data.spreadTrack
+
           _this.newChartData.rows = []
           dates = []
           var totalConfirms = []
@@ -338,8 +390,7 @@
           var predictCure = []
           var predictDeath = []
           var predictTotalInfections = []
-          var actives = response.data.data
-
+          var actives = response.data.data.statistic
           _this.modelResult = actives
           for (let i of actives) {
             //var dicTotal = {}
@@ -440,6 +491,7 @@
         yAxisName: ['新增数量']
       }
       return {
+        graphData: {},
         newChartData: {
           columns: ["date", '真实新增确诊', '预测新增感染', '预测新增确诊', '预测新增治愈', '预测新增死亡', '目前被感染人数', '目前正治疗人数'],
           rows: []
@@ -460,11 +512,12 @@
         selectedCity: "广东省",
         modelResult: [],
         form: {
-          beta: 0.05,
+          betaList: '0-0.05;3-0.02;8-0.01',
           trementlist: '0-8;10-4;20-2',
           mlist: '0-15;10-8;20-3',
           endDate: new Date(),
           province: '广东省',
+          simNum: 20,
           provinceOptions: [{value:"湖北省",label:"湖北"},{value:"广东省",label:"广东"},{value:"河南省",label:"河南"},{value:"浙江省",label:"浙江"},{value:"湖南省",label:"湖南"},{value:"安徽省",label:"安徽"},{value:"江西省",label:"江西"},{value:"江苏省",label:"江苏"},{value:"重庆市",label:"重庆"},{value:"山东省",label:"山东"},{value:"四川省",label:"四川"},{value:"黑龙江省",label:"黑龙江"},{value:"北京市",label:"北京"},{value:"上海市",label:"上海"},{value:"河北省",label:"河北"},{value:"福建省",label:"福建"},{value:"广西壮族自治区",label:"广西"},{value:"陕西省",label:"陕西"},{value:"云南省",label:"云南"},{value:"海南省",label:"海南"},{value:"贵州省",label:"贵州"},{value:"山西省",label:"山西"},{value:"天津市",label:"天津"},{value:"辽宁省",label:"辽宁"},{value:"甘肃省",label:"甘肃"},{value:"吉林省",label:"吉林"},{value:"新疆维吾尔自治区",label:"新疆"},{value:"内蒙古自治区",label:"内蒙古"},{value:"宁夏回族自治区",label:"宁夏"},{value:"青海省",label:"青海"},{value:"西藏自治区",label:"西藏"}],
           city: '',
           cityOptions: [{value:440300,label:"深圳"},{value:440600,label:"佛山"},{value:441300,label:"惠州"},{value:440800,label:"湛江"},{value:441900,label:"东莞"},{value:441400,label:"梅州"},{value:445100,label:"潮州"},{value:440100,label:"广州"},{value:440700,label:"江门"},{value:440900,label:"茂名"},{value:440500,label:"汕头"},{value:441600,label:"河源"},{value:441800,label:"清远"},{value:440400,label:"珠海"},{value:442000,label:"中山"},{value:441200,label:"肇庆"},{value:441700,label:"阳江"},{value:440200,label:"韶关"},{value:445200,label:"揭阳"},{value:441500,label:"汕尾"}],
@@ -514,8 +567,13 @@
 }
 
 .lschart {
-  width: 700px;
+  width: 900px;
   height: 500px;
+}
+
+.schart {
+  width: 900px;
+  height: 600px;
 }
 
 .chinaMap {

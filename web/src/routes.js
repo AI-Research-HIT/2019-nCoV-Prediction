@@ -2,10 +2,11 @@ import Login from './views/Login.vue'
 import NotFound from './views/404.vue'
 import Home from './views/Home.vue'
 import Main from './views/Main.vue'
-import ChinaAna from './views/china/Map.vue'
-import HaerbinAna from './views/haerbin/Map.vue'
-import SimTemplate from './views/sim-template/template.vue'
-import SEIBRModel from './views/SEIBR-model/SEIBR-model.vue'
+import TemplateSim from './views/template/template.vue'
+import HaerbinAna from './views/haerbin/haerbin.vue'
+import SEIQRSim from './views/seiqr-sim/seiqr-sim.vue'
+import SEIQRModel from './views/seiqr-model-desc/SEIQR-model.vue'
+import Manual from './views/manual/manual.vue'
 import Team from './views/team/Team.vue'
 import MonteCarlo from './views/montecarlo/montecarlo.vue'
 
@@ -31,7 +32,7 @@ let routes = [
         leaf: true,
         iconCls: 'el-icon-data-analysis',
         children: [
-            { path: '/china', component: ChinaAna, name: '省市疫情分析预测' },
+            { path: '/TemplateSim', component: TemplateSim, name: '省市疫情分析预测' },
         ]
     },
     {
@@ -41,7 +42,7 @@ let routes = [
         leaf: true,
         iconCls: 'el-icon-data-analysis',
         children: [
-            { path: '/sim-template', component: SimTemplate, name: '疫情发展状态模拟' },
+            { path: '/SEIQRSim', component: SEIQRSim, name: '疫情发展状态模拟' },
         ]
     },
     {
@@ -71,7 +72,17 @@ let routes = [
         leaf: true,
         iconCls: 'el-icon-notebook-2',
         children: [
-            { path: '/model', component: SEIBRModel, name: 'SEIQR模型详解' },
+            { path: '/model', component: SEIQRModel, name: 'SEIQR模型详解' },
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: '',
+        leaf: true,
+        iconCls: 'el-icon-notebook-2',
+        children: [
+            { path: '/manual', component: Manual, name: '网站手册' },
         ]
     },
     {

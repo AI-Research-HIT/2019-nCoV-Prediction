@@ -93,7 +93,7 @@
           </el-col>
         </el-row> -->
             <el-row>
-                <H2>疫情时间节点对比</H2>
+                <H3>疫情时间节点对比</H3>
                 <p>中间地图为计算时间区间中间时间的疫情情况，左右两图为下面滑动点控制的时间节点</p>
             <el-col :span="8">
               <div class="chinaMap" id="chinaMapBefore">
@@ -391,10 +391,7 @@
             var dicNew = {}
             var dicM = {}
             var dicAlpha = {}
-            var newI = i['newInfection']
-            if (newI != 0) {
-              dicNew['真实新增确诊'] = newI
-            }
+            dicNew['真实新增确诊'] = i['newInfection']
             dicNew['预测新增确诊'] = i['predictNew']
             var totalI = i['totalInfection']
             predictTotal.push(i['predictTotal'])
@@ -531,7 +528,7 @@
           columns: ['date', 'alpha'],
           rows: []
         },
-        selectedCity: "广东省",
+        selectedCity: "广东",
         modelResult: [],
         form: {
           beta: 0.05,

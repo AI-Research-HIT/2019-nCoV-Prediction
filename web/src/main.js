@@ -38,7 +38,7 @@ router.beforeEach((to, from, next) => {
   //NProgress.start();
   
   if (to.path == '/') {
-    next({ path: '/china'})
+    next({ path: '/TemplateSim'})
   } else {
     next()
   }
