@@ -52,7 +52,7 @@ let routes = [
         leaf: true,
         iconCls: 'el-icon-data-analysis',
         children: [
-            { path: '/haerbin', component: HaerbinAna, name: '哈尔滨疫情深入分析' },
+            { path: '/haerbin', component: HaerbinAna, name: '黑龙江疫情深入分析' },
         ]
     },
     {
