@@ -399,7 +399,7 @@ export default {
     var myChart = echarts.init(document.getElementById("mychart"));
     myChart.showLoading();
     setTimeout(function() {
-      console.log(option);
+      //console.log(option);
     }, 3000);
     var flag = 0;
     for(var i = 0;i<20;i++){

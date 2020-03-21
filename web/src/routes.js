@@ -32,7 +32,7 @@ let routes = [
         leaf: true,
         iconCls: 'el-icon-data-analysis',
         children: [
-            { path: '/TemplateSim', component: TemplateSim, name: '省市疫情分析预测' },
+            { path: '/TemplateSim', component: TemplateSim, name: '总体疫情分析预测' },
         ]
     },
     {
