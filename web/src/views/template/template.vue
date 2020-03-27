@@ -1,6 +1,6 @@
 <template>
     <section class="chart-container">
-        <H3>最新数据</H3>
+        <H3>国内最新疫情数据</H3>
         <el-row :gutter="40" class="panel-group">
             <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
                 <div class="card-panel" @click="handleSetLineChartData('newVisitis')">

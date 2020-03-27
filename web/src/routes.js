@@ -6,9 +6,10 @@ import TemplateSim from './views/template/template.vue'
 import HaerbinAna from './views/haerbin/haerbin.vue'
 import SEIQRSim from './views/seiqr-sim/seiqr-sim.vue'
 import SEIQRModel from './views/seiqr-model-desc/SEIQR-model.vue'
-import Manual from './views/manual/manual.vue'
+import Manual from './views/articles/manual.vue'
 import Team from './views/team/Team.vue'
 import MonteCarlo from './views/montecarlo/montecarlo.vue'
+import Single from './views/articles/single.vue'
 
 import { mapActions } from 'vuex'
 
@@ -78,11 +79,12 @@ let routes = [
     {
         path: '/',
         component: Home,
-        name: '',
-        leaf: true,
+        name: '文章',
+        leaf: false,
         iconCls: 'el-icon-notebook-2',
         children: [
             { path: '/manual', component: Manual, name: '网站手册' },
+            { path: '/single', component: Single, name: '一个病毒携带者的影响' },
         ]
     },
     {

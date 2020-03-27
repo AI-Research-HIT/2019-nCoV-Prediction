@@ -82,7 +82,7 @@
                             class="text"
                         >传染系数列表格式为:0-0.05;3-0.02;8-0.01, 表示从第0天开始传染系数为0.05, 第3天开始传染系数为0.02, 第8天开始人员传染系数0.01, 其中天数必须为整数</p>
                     </el-col>
-                    <el-col :span="5">
+                    <el-col :span="7">
                         <el-input v-model="form.betaList" placeholder="样例: 0-0.05;3-0.02;8-0.01"></el-input>
                     </el-col>
                 </el-row>
@@ -95,7 +95,7 @@
                             class="text"
                         >人员聚集度列表格式为:0-10.0;3-4.0;8-1.0, 表示从第0天开始人员聚集度为10.0, 第3天开始人员聚集度为4.0, 第8天开始人员聚集度为1.0, 其中天数必须为整数</p>
                     </el-col>
-                    <el-col :span="5">
+                    <el-col :span="7">
                         <el-input v-model="form.mlist" placeholder="样例: 0-10.0;3-4.0;8-1.0"></el-input>
                     </el-col>
                 </el-row>
@@ -107,7 +107,7 @@
                             class="text"
                         >发病到就诊时间列表格式为:0-10;3-4;8-1, 表示从第0天开始发病到就诊时间为10天, 第3天开始发病到就诊时间为4天, 第8天开始发病到就诊时间为1天</p>
                     </el-col>
-                    <el-col :span="5">
+                    <el-col :span="7">
                         <el-input v-model="form.trementlist" placeholder="样例: 0-10.0;3-4.0;8-1.0"></el-input>
                     </el-col>
                 </el-row>
@@ -116,6 +116,18 @@
                 <el-row>
                     <el-col :span="5">
                         <el-input-number v-model="form.medicalNum" :min="1000" :max="20000"></el-input-number>
+                    </el-col>
+                </el-row>
+            </el-form-item>
+            <el-form-item label="无症状感染者比率">
+                <el-row>
+                    <el-col :span="5">
+                        <el-input-number
+                            v-model="form.noSymptomProb"
+                            :precision="4"
+                            :step="0.001"
+                            :max="1"
+                        ></el-input-number>
                     </el-col>
                 </el-row>
             </el-form-item>
@@ -130,15 +142,22 @@
             <el-form-item label="仿真次数">
                 <el-row>
                     <el-col>
-                        <el-input-number v-model="form.simNum" :min="1" :max="100" label="仿真次数"></el-input-number>
+                        <el-input-number v-model="form.simNum" :min="1" :max="1000" label="仿真次数"></el-input-number>
                     </el-col>
                 </el-row>
             </el-form-item>
 
             <el-form-item>
                 <el-button type="primary" @click="onSubmit">开始仿真</el-button>
+                <!-- <el-button type="primary" @click="onMCalculate">m计算</el-button> -->
             </el-form-item>
         </el-form>
+        <!-- <el-row>
+            <el-col :span="20">
+                <H3>不同人群聚集度在100天后新增感染者为0的概率</H3>
+                <ve-line :data="mChartData" :setting="mChartSettings"></ve-line>
+            </el-col>
+        </el-row>-->
         <el-row>
             <el-col :span="20">
                 <div class="lschart" id="predictChart"></div>
@@ -313,6 +332,134 @@ export default {
         handleSetLineChartData(type) {
             this.$emit("handleSetLineChartData", type);
         },
+        onMCalculate() {
+            var _this = this;
+            if (this.form.endDate == "") {
+                this.$message({
+                    message: "请选择结束时间",
+                    type: "warning"
+                });
+                return;
+            }
+            var province = "";
+            var city = 0;
+            if (this.areaRadio == "1") {
+                province = this.form.province;
+                if (this.form.city != "") {
+                    city = this.form.city;
+                }
+            } else {
+                province = this.form.country;
+            }
+            if (province == "" || province == null) {
+                this.$message({
+                    message: "请选择一个城市或者地区",
+                    type: "warning"
+                });
+                return;
+            }
+            var startDate = new Date();
+            var day = Math.round(
+                (this.form.endDate - startDate) / (1000 * 60 * 60 * 24)
+            );
+            if (day < 0) {
+                this.$message({
+                    message: "日期不能早于2020年1月21日",
+                    type: "warning"
+                });
+                return;
+            }
+            var mlist = {};
+            try {
+                mlist = this.parsePairlist(this.form.mlist);
+            } catch (err) {
+                this.$message({
+                    message: err,
+                    type: "warning"
+                });
+                return;
+            }
+
+            var treamentlist = {};
+            try {
+                treamentlist = this.parseTreamentList();
+            } catch (err) {
+                this.$message({
+                    message: err,
+                    type: "warning"
+                });
+                return;
+            }
+
+            var betaList = {};
+            try {
+                betaList = this.parsePairlist(this.form.betaList);
+            } catch (err) {
+                this.$message({
+                    message: err,
+                    type: "warning"
+                });
+                return;
+            }
+
+            const loading = this.$loading({
+                lock: true,
+                text: 'Loading',
+                spinner: 'el-icon-loading',
+                background: 'rgba(0, 0, 0, 0.9)'
+            })
+
+            this.$axios({
+                method: "post",
+                url: "/api/m-simulate",
+
+                data: JSON.stringify({
+                    province: province,
+                    city: city,
+                    predictDay: day,
+                    initNum: this.form.initNum,
+                    betaList: betaList,
+                    mlist: mlist,
+                    simNum: this.form.simNum,
+                    treamentList: treamentlist,
+                    isQuarantineCloser: this.form.isQuarantine,
+                    medicalNum: this.form.medicalNum,
+                })
+            })
+                .then(function (response) {
+                    loading.close();
+                    if (response.data.code != 0) {
+                        _this.$message({
+                            message: response.data.msg,
+                            type: "warning"
+                        });
+                        return;
+                    }
+
+                    //_this.graphData = response.data.data.spreadTrack;
+
+                    _this.mChartData.rows = []
+                    var data = response.data.data;
+                    console.log(response.data)
+                    for (var i = 0; i < data.length; i++) {
+                        var mDic = {};
+                        mDic["初始感染人数1"] = data[i][0]
+                        mDic["初始感染人数2"] = data[i][1]
+                        mDic["初始感染人数4"] = data[i][2]
+                        mDic["初始感染人数8"] = data[i][3]
+                        mDic["初始感染人数16"] = data[i][4]
+                        //var dicTotal = {}
+                        mDic["m"] = i + 5 + ""
+
+                        _this.mChartData.rows.push(mDic)
+
+                    }
+                })
+                .catch(function (error) {
+                    loading.close();
+                    console.log(error);
+                });
+        },
         onSubmit() {
             var _this = this;
             if (this.form.endDate == "") {
@@ -402,6 +549,7 @@ export default {
                     betaList: betaList,
                     mlist: mlist,
                     simNum: this.form.simNum,
+                    noSymptomProb: this.form.noSymptomProb,
                     treamentList: treamentlist,
                     isQuarantineCloser: this.form.isQuarantine,
                     medicalNum: this.form.medicalNum,
@@ -451,6 +599,7 @@ export default {
                         dicPredictStatus["目前被感染人数"] = i["infectingCount"];
                         dicPredictStatus["目前正治疗人数"] = i["treamentingCount"];
                         dicPredictStatus["目前被确诊人数"] = i["confirmingCount"]
+                        dicPredictStatus["无症状感染者人数"] = i["noSymptomCount"]
                         dicPredictStatus["目前被感染未隔离人数"] = i["infectedNotQuarantineCount"];
                         dicPredictStatus["被隔离密切接触者人数"] = i["closerQuarantineCount"];
                         dicPredictMedical["目前正治疗人数"] = i["treamentingCount"];
@@ -598,14 +747,30 @@ export default {
         this.newChartSettings = {
             xAxisType: "category",
             yAxisName: ["数量"]
-        };
+        }
         this.deadProbChartSettings = {
             xAxisType: "category",
             yAxisName: ["数量"],
             yAxisType: ["percent"]
-        };
+        }
+        this.mChartSettings = {
+            xAxisType: "category",
+            yAxisName: ['数量'],
+            yAxisType: ['percent']
+        }
         return {
             graphData: {},
+            mChartData: {
+                columns: [
+                    "m",
+                    "初始感染人数1",
+                    "初始感染人数2",
+                    "初始感染人数4",
+                    "初始感染人数8",
+                    "初始感染人数16"
+                ],
+                rows: []
+            },
             deadProbChartData: {
                 columns: [
                     "date",
@@ -620,7 +785,8 @@ export default {
                     "目前正治疗人数",
                     "目前被感染未隔离人数",
                     "目前被确诊人数",
-                    "被隔离密切接触者人数"
+                    "被隔离密切接触者人数",
+                    "无症状感染者人数"
                 ],
                 rows: []
             },
@@ -669,6 +835,7 @@ export default {
                 isQuarantine: false,
                 initNum: 1,
                 medicalNum: 1000,
+                noSymptomProb: 0.000,
                 provinceOptions: [
                     { value: "湖北省", label: "湖北" },
                     { value: "广东省", label: "广东" },

@@ -65,6 +65,7 @@ function parsecsv(csv) {
       daymap[date] = daycnt;
       daycnt++;
       days.push(date);
+      console.log(date)
       ddays.push("0" + date.split("0200")[1]);
       mapdata.push([]);
       allNew.push(0);
